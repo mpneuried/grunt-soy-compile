@@ -142,8 +142,8 @@
         (function(f) {
           var lang, _fn, _j, _len1, _ref1, _sourceLangs, _targetLangs,
             _this = this;
-          _targetLangs = path.resolve(options.extractmsgpath);
           grunt.file.mkdir(options.extractmsgpath);
+          _targetLangs = path.resolve(options.extractmsgpath);
           _ref1 = options.languages;
           _fn = function(f, lang) {
             return aFns.push(function(cba) {
@@ -187,17 +187,16 @@
       changed = ((_ref = grunt.regarde) != null ? _ref.changed : void 0) || [];
       done = this.async();
       options = this.options({
+        jarPath: null,
         msgextract: false,
         extractmsgpath: null,
         infusemsgpath: null,
         sourceLang: "en_GB",
-        languages: [],
-        jarPath: null
+        languages: []
       });
       soyC.setJarPath(options.jarPath);
       grunt.verbose.writeflags(options, 'Options');
       aFns = [];
-      grunt.file.mkdir("tmp");
       this.files.forEach(function(file) {
         if (!options.msgextract) {
           simpleCompile(aFns, file, options, grunt, changed);

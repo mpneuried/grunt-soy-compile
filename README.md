@@ -86,7 +86,7 @@ Default: []
 
 An array of languages the compiler will generate.
 
-### Additional
+### Additional info
 
 - if you use `grunt-regards` instaed of `grunt-contrib-watch` to track chnaging files, the compiler will only compile the changed file.
 

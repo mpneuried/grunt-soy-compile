@@ -26,12 +26,6 @@ module.exports = (grunt) ->
 				src: ["tasks/*.coffee"]
 				dest: ""
 				ext: ".js"
-
-		jshint:
-			all: ["Gruntfile.js", "tasks/*.js", "<%= nodeunit.tests %>"]
-			options:
-				jshintrc: ".jshintrc"
-
 		
 		# Before generating any new files, remove any previously-created files.
 		clean:
@@ -84,7 +78,6 @@ module.exports = (grunt) ->
 	grunt.loadTasks "tasks"
 	
 	# These plugins provide necessary tasks.
-	grunt.loadNpmTasks "grunt-contrib-jshint"
 	grunt.loadNpmTasks "grunt-contrib-clean"
 	grunt.loadNpmTasks "grunt-contrib-nodeunit"
 	# just for developing this plugin
