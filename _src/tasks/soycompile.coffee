@@ -83,59 +83,60 @@ class Compiler
 		@grunt.fail.fatal( _err )
 		return
 
-simpleCompile = ( aFns, file, options, grunt )->
+simpleCompile = ( aFns, file, options, grunt, fileFilter )->
 	for f in file.src
-		do( f )=>
-			aFns.push ( cba )->
-				_targetPath = path.resolve( file.dest ).split(path.sep)
-				_targetPath.pop()
-				_targetPath = _targetPath.join( path.sep )
-				fname = path.basename( f, ".soy" )
-				_target = _targetPath + "/" + fname + ".js"
+		if not fileFilter?.length or f in fileFilter
+			do( f )=>
+				aFns.push ( cba )->
+					_targetPath = path.resolve( file.dest ).split(path.sep)
+					_targetPath.pop()
+					_targetPath = _targetPath.join( path.sep )
+					fname = path.basename( f, ".soy" )
+					_target = _targetPath + "/" + fname + ".js"
 
-				grunt.log.writeln('Compile ' + f + ' to ' + _target[process.cwd().length+1..] + ".")
+					grunt.log.writeln('Compile ' + f + ' to ' + _target[process.cwd().length+1..] + ".")
 
-				soyC.soy2js( path.resolve( f ), _target, cba )
-				return
+					soyC.soy2js( path.resolve( f ), _target, cba )
+					return
 
 	aFns
 
-extractAndCompile = ( aFns, file, options, grunt )->
+extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 	for f in file.src
+		if not fileFilter?.length or f in fileFilter
+			do( f )->
+				_targetLangs = path.resolve( options.extractmsgpath ) 
+				grunt.file.mkdir( options.extractmsgpath )
+				
+				for lang in options.languages
+					do( f, lang )=>
+						aFns.push ( cba )->
+							msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf"
 
-		_targetLangs = path.resolve( options.extractmsgpath ) 
-		grunt.file.mkdir( options.extractmsgpath )
-		
-		for lang in options.languages
-			do( f, lang )=>
+							grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".")
+							
+							soyC.soy2msg( path.resolve( f ), _targetLangs + "/" + msgFile, lang, options.sourceLang, cba )
+							return
+
+				if options.infusemsgpath?
+					_sourceLangs = path.resolve( options.infusemsgpath )
+				else
+					_sourceLangs = _targetLangs
+
 				aFns.push ( cba )->
-					msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf"
 
-					grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".")
-					
-					soyC.soy2msg( path.resolve( f ), _targetLangs + "/" + msgFile, lang, options.sourceLang, cba )
+					_targetPath = path.resolve( file.dest ).split(path.sep)
+					_targetPath.pop()
+					_targetPath = _targetPath.join( path.sep )
+					fname = path.basename( f, ".soy" )
+					outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js"
+
+					msgFileFormat = path.basename(f, '.soy') + "_{LOCALE}.xlf"
+					grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + options.languages.join( ", " ) + ".")
+
+					soyC.msg2js( path.resolve( f ), _sourceLangs + "/" + msgFileFormat, outputPathFormat, options.languages.join( "," ), cba )
 					return
-
-		if options.infusemsgpath?
-			_sourceLangs = path.resolve( options.infusemsgpath )
-		else
-			_sourceLangs = _targetLangs
-
-		aFns.push ( cba )->
-
-			_targetPath = path.resolve( file.dest ).split(path.sep)
-			_targetPath.pop()
-			_targetPath = _targetPath.join( path.sep )
-			fname = path.basename( f, ".soy" )
-			outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js"
-
-			fName = path.basename(f, '.soy')
-			msgFileFormat = fName + "_{LOCALE}.xlf"
-			grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + options.languages.join( ", " ) + ".")
-			
-			soyC.msg2js( path.resolve( f ), _sourceLangs + "/" + msgFileFormat, outputPathFormat, options.languages.join( "," ), cba )
-			return
-
+	
 	aFns
 
 module.exports = ( grunt )->
@@ -166,15 +167,13 @@ module.exports = ( grunt )->
 
 
 		this.files.forEach ( file )->
-			grunt.log.debug( file, grunt.util._.pluck( this.files, "src" ) )
-			if changed.length is 0 or grunt.util._.intersection( file.src, changed ).length >= 1
-				if not options.msgextract
-					simpleCompile( aFns, file, options, grunt )
-				else if options.msgextract and options.extractmsgpath?
-					extractAndCompile( aFns, file, options, grunt )
-				else
-					simpleCompile( aFns, file, options, grunt )
-				return		
+			if not options.msgextract
+				simpleCompile( aFns, file, options, grunt, changed )
+			else if options.msgextract and options.extractmsgpath?
+				extractAndCompile( aFns, file, options, grunt, changed )
+			else
+				simpleCompile( aFns, file, options, grunt, changed )
+			return		
 
 		grunt.util.async.series aFns, ( err, result )=>
 			if err

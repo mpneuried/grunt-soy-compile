@@ -17,3 +17,4 @@ dump.rdb
 tmp
 .sublime*
 *.sublime-project
+/npm-debug.log
