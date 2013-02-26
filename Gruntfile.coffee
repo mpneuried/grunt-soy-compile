@@ -10,14 +10,14 @@ module.exports = (grunt) ->
 	
 	# Project configuration.
 	grunt.initConfig
-		watch:
+		regarde:
 			tasks:
 				files: ["_src/tasks/*.coffee"]
 				tasks: "coffee:tasks"
 
-			soy:
+			soyComplex:
 				files: ["test/tmpls/*.soy"]
-				tasks: "soycompile:test"
+				tasks: "soycompile:testLangExtLangIn"
 
 		coffee:
 			tasks:
@@ -44,10 +44,33 @@ module.exports = (grunt) ->
 				expand: true
 				cwd: 'test/tmpls',
 				src: ["*.soy"]
-				dest: "tmp"
+				dest: "tmp/test"
+				ext: ".js"
+
+			testLang:
+				expand: true
+				cwd: 'test/tmpls',
+				src: ["*.soy"]
+				dest: "tmp/testLang"
 				ext: ".js"
 				options:
-					languages: [ "de_DE" ]
+					msgextract: true
+					sourceLang: "de_DE"
+					languages: [ "de_DE", "en_GB" ]
+					extractmsgpath: "tmp/lang_out"
+
+			testLangExtLangIn:
+				expand: true
+				cwd: 'test/tmpls',
+				src: ["*.soy"]
+				dest: "tmp/testLangExtLangIn"
+				ext: ".js"
+				options:
+					msgextract: true
+					sourceLang: "de_DE"
+					languages: [ "de_DE", "en_GB" ]
+					extractmsgpath: "tmp/lang_out"
+					infusemsgpath: "test/lang_in"
 
 
 		
@@ -64,9 +87,11 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks "grunt-contrib-clean"
 	grunt.loadNpmTasks "grunt-contrib-nodeunit"
 	# just for developing this plugin
-	grunt.loadNpmTasks "grunt-contrib-watch"
+	grunt.loadNpmTasks "grunt-regarde"
 	grunt.loadNpmTasks "grunt-contrib-coffee"
 	
+	grunt.registerTask "watch", "regarde"
+
 	# Whenever the "test" task is run, first clean the "tmp" dir, then run this
 	# plugin's task(s), then test the result.
 	grunt.registerTask "test", ["clean", "soycompile", "nodeunit"]

@@ -1,9 +1,84 @@
 (function() {
-  var exec, extractAndCompile, path, simpleCompile;
+  var Compiler, exec, extractAndCompile, path, simpleCompile, soyC,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   exec = require('child_process').exec;
 
   path = require("path");
+
+  soyC = null;
+
+  Compiler = (function() {
+
+    function Compiler(grunt, classPath) {
+      this.grunt = grunt;
+      this.classPath = classPath;
+      this._compile = __bind(this._compile, this);
+      this.msg2js = __bind(this.msg2js, this);
+      this.soy2msg = __bind(this.soy2msg, this);
+      this.soy2js = __bind(this.soy2js, this);
+      this.soyCom = this.classPath + "/SoyToJsSrcCompiler.jar";
+      this.msgExt = this.classPath + "/SoyMsgExtractor.jar";
+      this.grunt.verbose.writeflags({
+        compiler: this.soyCom,
+        msgext: this.msgExt
+      }, 'Jar Paths');
+      return;
+    }
+
+    Compiler.prototype.soy2js = function(file, output, cb) {
+      var args;
+      args = {
+        outputPathFormat: output
+      };
+      this.grunt.verbose.writeflags(args, "Args");
+      this._compile(this.soyCom, file, args, cb);
+    };
+
+    Compiler.prototype.soy2msg = function(file, output, lang, sourcelang, cb) {
+      var args;
+      args = {
+        outputFile: output,
+        targetLocaleString: lang,
+        sourceLocaleString: sourcelang
+      };
+      this.grunt.verbose.writeflags(args, "Args");
+      this._compile(this.msgExt, file, args, cb);
+    };
+
+    Compiler.prototype.msg2js = function(file, fileFormat, output, langs, cb) {
+      var args;
+      args = {
+        messageFilePathFormat: fileFormat,
+        outputPathFormat: output,
+        locales: langs
+      };
+      this.grunt.verbose.writeflags(args, "Args");
+      this._compile(this.soyCom, file, args, cb);
+    };
+
+    Compiler.prototype._compile = function(path, file, args, cb) {
+      var key, val, _command,
+        _this = this;
+      _command = "java -jar " + path + " ";
+      for (key in args) {
+        val = args[key];
+        _command += "--" + key + " " + val + " ";
+      }
+      _command += file;
+      this.grunt.verbose.writeln(_command);
+      exec(_command, function(err, stdout, stderr) {
+        if (err) {
+          cb(err);
+          return;
+        }
+        cb(null, stdout);
+      });
+    };
+
+    return Compiler;
+
+  })();
 
   simpleCompile = function(aFns, file, options, grunt) {
     var f, _i, _len, _ref;
@@ -11,85 +86,84 @@
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       f = _ref[_i];
       aFns.push(function(cba) {
-        var fName, _command, _target, _targetLangs,
-          _this = this;
+        var _target;
         _target = path.resolve(file.dest);
         grunt.log.writeln('Compile ' + f + ' to ' + file.dest + ".");
-        fName = path.basename(f, '.soy');
-        _targetLangs = path.resolve(options.extractmsgpath);
-        grunt.file.mkdir("tmp/lang");
-        _command = "java -jar " + options.soycompilerPath + " --outputPathFormat " + _target.slice(0, -3) + ".js " + (path.resolve(f));
-        grunt.verbose.writeln(_command);
-        exec(_command, function(err, stdout, stderr) {
-          if (errgrunt) {
-            cba(err);
-            return;
-          }
-          cba(null, stdout);
-        });
+        soyC.soy2js(path.resolve(f), "" + _target.slice(0, -3) + ".js", cba);
       });
     }
     return aFns;
   };
 
   extractAndCompile = function(aFns, file, options, grunt) {
-    var f, _i, _len, _ref;
+    var f, lang, _fn, _i, _j, _len, _len1, _ref, _ref1, _sourceLangs, _targetLangs,
+      _this = this;
     _ref = file.src;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       f = _ref[_i];
-      aFns.push(function(cba) {
-        var fName, _command, _target,
-          _this = this;
-        _target = path.resolve(file.dest);
-        grunt.log.writeln('Compile ' + f + ' to ' + file.dest + ".");
-        fName = path.basename(f, '.soy');
-        _command = "java -jar " + options.msgExtPath + " --outputFile " + _target.slice(0, -3) + ".js " + (path.resolve(f));
-        grunt.verbose.writeln(_command);
-        exec(_command, function(err, stdout, stderr) {
-          if (errgrunt) {
-            cba(err);
-            return;
-          }
-          cba(null, stdout);
+      _targetLangs = path.resolve(options.extractmsgpath);
+      grunt.file.mkdir(options.extractmsgpath);
+      _ref1 = options.languages;
+      _fn = function(lang) {
+        return aFns.push(function(cba) {
+          var msgFile;
+          msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf";
+          grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".");
+          soyC.soy2msg(path.resolve(f), _targetLangs + "/" + msgFile, lang, options.sourceLang, cba);
         });
+      };
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        lang = _ref1[_j];
+        _fn(lang);
+      }
+      if (options.infusemsgpath != null) {
+        _sourceLangs = path.resolve(options.infusemsgpath);
+      } else {
+        _sourceLangs = _targetLangs;
+      }
+      aFns.push(function(cba) {
+        var fName, msgFileFormat, outputPathFormat;
+        fName = path.basename(f, '.soy');
+        msgFileFormat = fName + "_{LOCALE}.xlf";
+        outputPathFormat = path.resolve(file.dest).slice(0, -3) + "_{LOCALE}.js";
+        grunt.log.writeln('Compile ' + f + ' to ' + file.dest.slice(0, -3) + "_{LOCALE}.js" + ' using languages ' + options.languages.join(", ") + ".");
+        soyC.msg2js(path.resolve(f), _sourceLangs + "/" + msgFileFormat, outputPathFormat, options.languages.join(","), cba);
       });
     }
     return aFns;
   };
 
   module.exports = function(grunt) {
+    soyC = new Compiler(grunt, path.resolve(__dirname + "/../_java/"));
     grunt.registerMultiTask("soycompile", "Compile soy files", function() {
-      var aFns, done, options,
+      var aFns, changed, done, options, _ref,
         _this = this;
+      changed = ((_ref = grunt.regarde) != null ? _ref.changed : void 0) || [];
       done = this.async();
       options = this.options({
-        extract: false,
+        msgextract: false,
         extractmsgpath: null,
         infusemsgpath: null,
-        languages: [],
-        outputPathFormat: ""
+        sourceLang: "en_GB",
+        languages: []
       });
       grunt.verbose.writeflags(options, 'Options');
-      options.msgExtPath = path.resolve(__dirname + "/../_java/SoyMsgExtractor.jar");
-      options.soycompilerPath = path.resolve(__dirname + "/../_java/SoyToJsSrcCompiler.jar");
-      grunt.verbose.writeflags({
-        compiler: options.soycompilerPath,
-        msgext: options.msgExtPath
-      }, 'Jar Paths');
       aFns = [];
       grunt.file.mkdir("tmp");
       this.files.forEach(function(file) {
-        if (!options.extract) {
-          simpleCompile(aFns, file, options, grunt);
-        } else if (options.extract && options.extractmsgpath) {
-          extractAndCompile(aFns, file, options, grunt);
+        if (changed.length === 0 || grunt.util._.intersection(file.src, changed).length >= 1) {
+          if (!options.msgextract) {
+            simpleCompile(aFns, file, options, grunt);
+          } else if (options.msgextract && options.extractmsgpath) {
+            extractAndCompile(aFns, file, options, grunt);
+          }
         }
       });
-      grunt.util.async.parallel(aFns, function(err, result) {
+      grunt.util.async.series(aFns, function(err, result) {
         if (err) {
           grunt.fail.warn(err);
         } else {
-          grunt.log.debug(result);
+          grunt.log.debug("RESULTS", result);
         }
         done();
       });

@@ -1,0 +1,19 @@
+$ cat .gitignore
+
+# @author mpneuried
+
+*.profile
+*.lock
+*.conflict
+*.DS_Store
+.project
+.settings
+.externalToolBuilders
+/node_modules/*
+dump.rdb
+
+.DS_Store
+
+tmp
+.sublime*
+*.sublime-project
