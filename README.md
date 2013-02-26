@@ -135,6 +135,11 @@ soycompile: {
 
 For more examples on how to use the `expand` API shown in the `glob_to_multiple` example, see "Building the files object dynamically" in the grunt wiki entry [Configuring Tasks](http://gruntjs.com/configuring-tasks).
 
+## Todos
+
+- solution to define the `jarPath` independent from the `Gruntfile.js` to set different paths for different developers of the same repository.
+- implement test cases to check for correct template generation.
+
 ## Release History
 
  * 2013-02-24   v0.1.0   Initial commit
