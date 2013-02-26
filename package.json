@@ -1,0 +1,43 @@
+{
+  "name": "grunt-soy-compile",
+  "description": "Compile Goggle Closure Templates ( SOY ) templates inclding the handling of XLIFF language files. ( Details for SOY: https://developers.google.com/closure/templates/ )",
+  "version": "0.0.1",
+  "homepage": "https://github.com/mpneuried/grunt-soy-compile",
+  "author": {
+    "name": "Mathias Peter"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mpneuried/grunt-soy-compile.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mpneuried/grunt-soy-compile/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mpneuried/grunt-soy-compile/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "Gruntfile.coffee",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-coffee": "~0.4.0",
+    "grunt-contrib-watch": "~0.2.0",
+    "grunt": "~0.4.0"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.0"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
