@@ -4,16 +4,24 @@ path = require( "path" )
 soyC = null
 
 class Compiler
-	constructor: ( @grunt, @classPath )->
-
-		@soyCom =  @classPath + "/SoyToJsSrcCompiler.jar"
-		@msgExt =  @classPath + "/SoyMsgExtractor.jar"
-
-		@grunt.verbose.writeflags( { compiler: @soyCom, msgext: @msgExt }, 'Jar Paths')
+	constructor: ( @grunt )->
 
 		return
 
+	setJarPath: ( path )=>
+		if path?.length
+			@soyCom =  path + "/SoyToJsSrcCompiler.jar"
+			@msgExt =  path + "/SoyMsgExtractor.jar"
+
+			@grunt.verbose.writeflags( { compiler: @soyCom, msgext: @msgExt }, 'Jar Paths')
+		else
+			@_jarPathError()
+		return
+
 	soy2js: ( file, output, cb )=>
+		if not @soyCom
+			@_jarPathError()
+			return
 		args = 
 			outputPathFormat: output
 		@grunt.verbose.writeflags( args, "Args" )
@@ -22,6 +30,9 @@ class Compiler
 		return
 
 	soy2msg: ( file, output, lang, sourcelang, cb )=>
+		if not @msgExt
+			@_jarPathError()
+			return
 		args = 
 			outputFile: output
 			targetLocaleString: lang
@@ -32,6 +43,9 @@ class Compiler
 		return
 
 	msg2js: ( file, fileFormat, output, langs, cb )=>
+		if not @soyCom
+			@_jarPathError()
+			return
 		args = 
 			messageFilePathFormat: fileFormat
 			outputPathFormat: output
@@ -58,6 +72,13 @@ class Compiler
 
 			cb( null, stdout )
 			return
+		return
+
+	_jarPathError: =>
+		_err = new Error()
+		_err.name = "missing-jar-path"
+		_err.message = "Before using grunt-soy-compile you have to define the jar paths by settng the option `jarPath`"
+		@grunt.fail.fatal( _err )
 		return
 
 simpleCompile = ( aFns, file, options, grunt )->
@@ -119,6 +140,9 @@ module.exports = ( grunt )->
 			infusemsgpath: null
 			sourceLang: "en_GB"
 			languages: []
+			jarPath: null
+
+		soyC.setJarPath( options.jarPath )
 
 		grunt.verbose.writeflags(options, 'Options')
 

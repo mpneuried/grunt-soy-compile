@@ -10,24 +10,36 @@
 
   Compiler = (function() {
 
-    function Compiler(grunt, classPath) {
+    function Compiler(grunt) {
       this.grunt = grunt;
-      this.classPath = classPath;
+      this._jarPathError = __bind(this._jarPathError, this);
       this._compile = __bind(this._compile, this);
       this.msg2js = __bind(this.msg2js, this);
       this.soy2msg = __bind(this.soy2msg, this);
       this.soy2js = __bind(this.soy2js, this);
-      this.soyCom = this.classPath + "/SoyToJsSrcCompiler.jar";
-      this.msgExt = this.classPath + "/SoyMsgExtractor.jar";
-      this.grunt.verbose.writeflags({
-        compiler: this.soyCom,
-        msgext: this.msgExt
-      }, 'Jar Paths');
+      this.setJarPath = __bind(this.setJarPath, this);
       return;
     }
 
+    Compiler.prototype.setJarPath = function(path) {
+      if (path != null ? path.length : void 0) {
+        this.soyCom = path + "/SoyToJsSrcCompiler.jar";
+        this.msgExt = path + "/SoyMsgExtractor.jar";
+        this.grunt.verbose.writeflags({
+          compiler: this.soyCom,
+          msgext: this.msgExt
+        }, 'Jar Paths');
+      } else {
+        this._jarPathError();
+      }
+    };
+
     Compiler.prototype.soy2js = function(file, output, cb) {
       var args;
+      if (!this.soyCom) {
+        this._jarPathError();
+        return;
+      }
       args = {
         outputPathFormat: output
       };
@@ -37,6 +49,10 @@
 
     Compiler.prototype.soy2msg = function(file, output, lang, sourcelang, cb) {
       var args;
+      if (!this.msgExt) {
+        this._jarPathError();
+        return;
+      }
       args = {
         outputFile: output,
         targetLocaleString: lang,
@@ -48,6 +64,10 @@
 
     Compiler.prototype.msg2js = function(file, fileFormat, output, langs, cb) {
       var args;
+      if (!this.soyCom) {
+        this._jarPathError();
+        return;
+      }
       args = {
         messageFilePathFormat: fileFormat,
         outputPathFormat: output,
@@ -74,6 +94,14 @@
         }
         cb(null, stdout);
       });
+    };
+
+    Compiler.prototype._jarPathError = function() {
+      var _err;
+      _err = new Error();
+      _err.name = "missing-jar-path";
+      _err.message = "Before using grunt-soy-compile you have to define the jar paths";
+      this.grunt.fail.fatal(_err);
     };
 
     return Compiler;
@@ -147,6 +175,7 @@
         sourceLang: "en_GB",
         languages: []
       });
+      soyC.setJarPath(options.jarPath);
       grunt.verbose.writeflags(options, 'Options');
       aFns = [];
       grunt.file.mkdir("tmp");

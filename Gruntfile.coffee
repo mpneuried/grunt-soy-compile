@@ -46,6 +46,8 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/test"
 				ext: ".js"
+				options:
+					jarPath: "/Library/tcs_utils"
 
 			testLang:
 				expand: true
@@ -54,6 +56,7 @@ module.exports = (grunt) ->
 				dest: "tmp/testLang"
 				ext: ".js"
 				options:
+					jarPath: "/Library/tcs_utils"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB" ]
@@ -66,6 +69,7 @@ module.exports = (grunt) ->
 				dest: "tmp/testLangExtLangIn"
 				ext: ".js"
 				options:
+					jarPath: "/Library/tcs_utils"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB" ]
