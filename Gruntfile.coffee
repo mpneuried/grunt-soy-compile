@@ -54,7 +54,6 @@ module.exports = (grunt) ->
 				cwd: 'test/tmpls',
 				src: ["*.soy"]
 				dest: "tmp/testLang"
-				ext: ".js"
 				options:
 					jarPath: "/Library/tcs_utils"
 					msgextract: true
@@ -67,7 +66,6 @@ module.exports = (grunt) ->
 				cwd: 'test/tmpls',
 				src: ["*.soy"]
 				dest: "tmp/testLangExtLangIn"
-				ext: ".js"
 				options:
 					jarPath: "/Library/tcs_utils"
 					msgextract: true

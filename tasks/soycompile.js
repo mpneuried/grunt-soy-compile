@@ -100,7 +100,7 @@
       var _err;
       _err = new Error();
       _err.name = "missing-jar-path";
-      _err.message = "Before using grunt-soy-compile you have to define the jar paths";
+      _err.message = "Before using grunt-soy-compile you have to define the jar paths by settng the option `jarPath`";
       this.grunt.fail.fatal(_err);
     };
 
@@ -109,16 +109,24 @@
   })();
 
   simpleCompile = function(aFns, file, options, grunt) {
-    var f, _i, _len, _ref;
+    var f, _fn, _i, _len, _ref,
+      _this = this;
     _ref = file.src;
+    _fn = function(f) {
+      return aFns.push(function(cba) {
+        var fname, _target, _targetPath;
+        _targetPath = path.resolve(file.dest).split(path.sep);
+        _targetPath.pop();
+        _targetPath = _targetPath.join(path.sep);
+        fname = path.basename(f, ".soy");
+        _target = _targetPath + "/" + fname + ".js";
+        grunt.log.writeln('Compile ' + f + ' to ' + _target.slice(process.cwd().length + 1) + ".");
+        soyC.soy2js(path.resolve(f), _target, cba);
+      });
+    };
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       f = _ref[_i];
-      aFns.push(function(cba) {
-        var _target;
-        _target = path.resolve(file.dest);
-        grunt.log.writeln('Compile ' + f + ' to ' + file.dest + ".");
-        soyC.soy2js(path.resolve(f), "" + _target.slice(0, -3) + ".js", cba);
-      });
+      _fn(f);
     }
     return aFns;
   };
@@ -132,7 +140,7 @@
       _targetLangs = path.resolve(options.extractmsgpath);
       grunt.file.mkdir(options.extractmsgpath);
       _ref1 = options.languages;
-      _fn = function(lang) {
+      _fn = function(f, lang) {
         return aFns.push(function(cba) {
           var msgFile;
           msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf";
@@ -142,7 +150,7 @@
       };
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         lang = _ref1[_j];
-        _fn(lang);
+        _fn(f, lang);
       }
       if (options.infusemsgpath != null) {
         _sourceLangs = path.resolve(options.infusemsgpath);
@@ -150,11 +158,15 @@
         _sourceLangs = _targetLangs;
       }
       aFns.push(function(cba) {
-        var fName, msgFileFormat, outputPathFormat;
+        var fName, fname, msgFileFormat, outputPathFormat, _targetPath;
+        _targetPath = path.resolve(file.dest).split(path.sep);
+        _targetPath.pop();
+        _targetPath = _targetPath.join(path.sep);
+        fname = path.basename(f, ".soy");
+        outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js";
         fName = path.basename(f, '.soy');
         msgFileFormat = fName + "_{LOCALE}.xlf";
-        outputPathFormat = path.resolve(file.dest).slice(0, -3) + "_{LOCALE}.js";
-        grunt.log.writeln('Compile ' + f + ' to ' + file.dest.slice(0, -3) + "_{LOCALE}.js" + ' using languages ' + options.languages.join(", ") + ".");
+        grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat.slice(process.cwd().length + 1) + ' using languages ' + options.languages.join(", ") + ".");
         soyC.msg2js(path.resolve(f), _sourceLangs + "/" + msgFileFormat, outputPathFormat, options.languages.join(","), cba);
       });
     }
@@ -173,18 +185,22 @@
         extractmsgpath: null,
         infusemsgpath: null,
         sourceLang: "en_GB",
-        languages: []
+        languages: [],
+        jarPath: null
       });
       soyC.setJarPath(options.jarPath);
       grunt.verbose.writeflags(options, 'Options');
       aFns = [];
       grunt.file.mkdir("tmp");
       this.files.forEach(function(file) {
+        grunt.log.debug(file, grunt.util._.pluck(this.files, "src"));
         if (changed.length === 0 || grunt.util._.intersection(file.src, changed).length >= 1) {
           if (!options.msgextract) {
             simpleCompile(aFns, file, options, grunt);
-          } else if (options.msgextract && options.extractmsgpath) {
+          } else if (options.msgextract && (options.extractmsgpath != null)) {
             extractAndCompile(aFns, file, options, grunt);
+          } else {
+            simpleCompile(aFns, file, options, grunt);
           }
         }
       });

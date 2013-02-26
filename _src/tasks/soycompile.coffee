@@ -1,6 +1,8 @@
 exec = require('child_process').exec
 path = require( "path" )
 
+
+
 soyC = null
 
 class Compiler
@@ -83,12 +85,18 @@ class Compiler
 
 simpleCompile = ( aFns, file, options, grunt )->
 	for f in file.src
-		aFns.push ( cba )->
-			_target = path.resolve( file.dest ) 
-			grunt.log.writeln('Compile ' + f + ' to ' + file.dest + ".")
+		do( f )=>
+			aFns.push ( cba )->
+				_targetPath = path.resolve( file.dest ).split(path.sep)
+				_targetPath.pop()
+				_targetPath = _targetPath.join( path.sep )
+				fname = path.basename( f, ".soy" )
+				_target = _targetPath + "/" + fname + ".js"
 
-			soyC.soy2js( path.resolve( f ), "#{ _target[..-4] }.js", cba )
-			return
+				grunt.log.writeln('Compile ' + f + ' to ' + _target[process.cwd().length+1..] + ".")
+
+				soyC.soy2js( path.resolve( f ), _target, cba )
+				return
 
 	aFns
 
@@ -99,7 +107,7 @@ extractAndCompile = ( aFns, file, options, grunt )->
 		grunt.file.mkdir( options.extractmsgpath )
 		
 		for lang in options.languages
-			do( lang )=>
+			do( f, lang )=>
 				aFns.push ( cba )->
 					msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf"
 
@@ -114,10 +122,16 @@ extractAndCompile = ( aFns, file, options, grunt )->
 			_sourceLangs = _targetLangs
 
 		aFns.push ( cba )->
+
+			_targetPath = path.resolve( file.dest ).split(path.sep)
+			_targetPath.pop()
+			_targetPath = _targetPath.join( path.sep )
+			fname = path.basename( f, ".soy" )
+			outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js"
+
 			fName = path.basename(f, '.soy')
 			msgFileFormat = fName + "_{LOCALE}.xlf"
-			outputPathFormat = path.resolve( file.dest )[..-4] + "_{LOCALE}.js"
-			grunt.log.writeln('Compile ' + f + ' to ' + file.dest[..-4] + "_{LOCALE}.js" + ' using languages ' + options.languages.join( ", " ) + ".")
+			grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + options.languages.join( ", " ) + ".")
 			
 			soyC.msg2js( path.resolve( f ), _sourceLangs + "/" + msgFileFormat, outputPathFormat, options.languages.join( "," ), cba )
 			return
@@ -150,12 +164,16 @@ module.exports = ( grunt )->
 
 		grunt.file.mkdir( "tmp" )
 
+
 		this.files.forEach ( file )->
+			grunt.log.debug( file, grunt.util._.pluck( this.files, "src" ) )
 			if changed.length is 0 or grunt.util._.intersection( file.src, changed ).length >= 1
 				if not options.msgextract
 					simpleCompile( aFns, file, options, grunt )
-				else if options.msgextract and options.extractmsgpath
+				else if options.msgextract and options.extractmsgpath?
 					extractAndCompile( aFns, file, options, grunt )
+				else
+					simpleCompile( aFns, file, options, grunt )
 				return		
 
 		grunt.util.async.series aFns, ( err, result )=>
