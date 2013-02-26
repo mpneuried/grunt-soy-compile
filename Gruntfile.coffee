@@ -45,7 +45,6 @@ module.exports = (grunt) ->
 				cwd: 'test/tmpls',
 				src: ["*.soy"]
 				dest: "tmp/test"
-				ext: ".js"
 				options:
 					jarPath: "/Library/tcs_utils"
 

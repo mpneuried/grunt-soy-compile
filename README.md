@@ -1,8 +1,6 @@
 # grunt-soy-compile [![Build Status](https://secure.travis-ci.org/mpneuried/grunt-soy-compile.png?branch=master)](http://travis-ci.org/mpneuried/grunt-soy-compile)
 
-> Compile soy files including XLIFF language handling.
-
-
+> Compile soy template files including XLIFF language handling.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.0`
@@ -18,7 +16,125 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 ```js
 grunt.loadNpmTasks('grunt-soy-compile');
 ```
+*This plugin was designed to work with Grunt 0.4.x. If you're still using grunt v0.3.x it's strongly recommended that [you upgrade](http://gruntjs.com/upgrading-from-0.3-to-0.4)*
+
+## Soy compile task
+
+_Run this task with the `grunt soycompile` command._
+
+Task targets, files and options may be specified according to the grunt [Configuring tasks](http://gruntjs.com/configuring-tasks) guide.
+
+### Options
+
+#### jarPath
+
+**REQUIRED**
+
+Type: `String`
+Default: null
+
+The path to the google clousure template comipler jar files.
+Put the `SoyToJsSrcCompiler.jar` and `SoyMsgExtractor.jar` in one directory and set this `jarPath` option as absolute path to the containing folder.
+
+You can download the **jar** files here:
+- [ SoyToJsSrcCompiler ](http://closure-templates.googlecode.com/files/closure-templates-for-javascript-latest.zip)
+- [ SoyMsgExtractor ](http://closure-templates.googlecode.com/files/closure-templates-msg-extractor-latest.zip)
 
 
+#### msgextract
+
+Type: `Boolean`
+Default: false
+
+Use the message extractor to generate the xliff files out of the soy messages. This make only sense in combination with the `extractmsgpath` option.
+
+#### extractmsgpath
+
+Type: `String`
+Default: null
+*only relevant if `msgextract = true`*
+
+The relative path to the folder in witch the xliff files will be generated.
+**Note:** Soy overwrites the whole xliff file during every extraction. So it eventually makes sense to use the `infusemsgpath` option.
+
+#### infusemsgpath
+
+Type: `String`
+Default: [ extractmsgpath ]
+*only relevant if `msgextract = true`*
+
+The relative path to the folder from wich the compiler grabs the xliff generated files. If this option has not been defined the `extractmsgpath` will be used.
+
+**Info:** If you got a software to fill the generated xliff files with the translations you can use this option to generate the localized templates.
+
+**Note:** If the soy compiler won't find a translation element within the xliff it uses the default defined within teh message.
 
 
+#### sourceLang
+
+Type: `String`
+Default: "en_GB"
+*only relevant if `msgextract = true`*
+
+The source language you wrote your soy templates.
+
+#### languages
+
+Type: `Array`
+Default: []
+*only relevant if `msgextract = true`*
+
+An array of languages the compiler will generate.
+
+### Additional
+
+- if you use `grunt-regards` instaed of `grunt-contrib-watch` to track chnaging files, the compiler will only compile the changed file.
+
+### Usage Examples
+
+#### simple
+
+A simple example without using the extractor and soy translation features.
+
+```js
+soycompile: {
+	mytask: {
+		expand: true, 
+		cwd: 'relative/path/to/sources',
+		src: ["*.soy"],
+		dest: "relative/path/for/results",
+		options: {
+			jarPath: "/absolute/path/to/the/jar/files"
+		}
+	}
+}
+```
+
+#### complex
+
+A complex example using the extractor and soy translation features.
+
+```js
+soycompile: {
+	mytask: {
+		expand: true, 
+		cwd: 'relative/path/to/sources',
+		src: ["*.soy"],
+		dest: "relative/path/for/results",
+		options: {
+			jarPath: "/absolute/path/to/the/jar/files",
+			msgextract: true,
+			sourceLang: "en_GB",
+			languages: [ "en_GB", "de_DE", "jp_JP" ],
+			extractmsgpath: "relative/path/for/generated/xliffs",
+			infusemsgpath: "relative/path/to/translated/xliffs"
+		}
+	}
+}
+```
+
+For more examples on how to use the `expand` API shown in the `glob_to_multiple` example, see "Building the files object dynamically" in the grunt wiki entry [Configuring Tasks](http://gruntjs.com/configuring-tasks).
+
+## Release History
+
+ * 2013-02-24   v0.1.0   Initial commit
