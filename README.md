@@ -86,9 +86,6 @@ Default: []
 
 An array of languages the compiler will generate.
 
-### Additional info
-
-- if you use `grunt-regards` instaed of `grunt-contrib-watch` to track chnaging files, the compiler will only compile the changed file.
 
 ### Usage Examples
 
@@ -135,11 +132,54 @@ soycompile: {
 
 For more examples on how to use the `expand` API shown in the `glob_to_multiple` example, see "Building the files object dynamically" in the grunt wiki entry [Configuring Tasks](http://gruntjs.com/configuring-tasks).
 
+### Additional info
+
+#### grunt-regards
+
+- if you use `grunt-regards` instaed of `grunt-contrib-watch` to track chnaging files, the compiler will only compile the changed file.
+
+#### differnet `jarPaths`
+
+If you have to define different paths to the jarFiles for differnet developers i use the folowing solution.
+In many projects i define a file `config.json` to the root witch will be ignored by `.gitignore`. Within this file every developer can change the configutation for it's own development envorinment.
+
+To set the jarPath i define something like that in the `config.json`.
+
+```json
+{
+	"grunt":{
+		"soyJarPath": "/Library/tcs_utils"
+	}
+}
+```
+
+Within the `Gruntfile.js` you set:
+
+```js
+// read the config file
+var _conf = grunt.file.readJSON('config.json')
+
+grunt.initConfig({
+	soycompile: {
+		mytask: {
+			expand: true, 
+			cwd: 'relative/path/to/sources',
+			src: ["*.soy"],
+			dest: "relative/path/for/results",
+			options: {
+				// define a deviating path in `config.json` under `...{ "soycompile":{"jarPath": "/absolute/path/to/another/jar/files"}}...`. Otherwise use a default.
+				jarPath:  (typeof __conf !== "undefined" && __conf !== null ? (_ref = __conf.grunt) != null ? _ref.soyJarPath : void 0 : void 0) || "/absolute/path/to/the/jar/files",
+			}
+		}
+	}
+});
+```
+
 ## Todos
 
-- solution to define the `jarPath` independent from the `Gruntfile.js` to set different paths for different developers of the same repository.
-- implement test cases to check for correct template generation.
+ * implement test cases to check for correct template generation.
 
 ## Release History
-
+	
+ * 2013-02-28   v0.1.1   Do not kill watch task on compile error; Added solution for differnet `jarPath` per develeoper to readme.
  * 2013-02-24   v0.1.0   Initial commit

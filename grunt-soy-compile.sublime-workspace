@@ -91,17 +91,6 @@
 	},
 	"buffers":
 	[
-		{
-			"contents": "{\n  \"name\": \"grunt-soy-compile\",\n  \"description\": \"Compile Goggle Closure Templates ( SOY ) templates inclding the handling of XLIFF language files. ( Details for SOY: https://developers.google.com/closure/templates/ )\",\n  \"version\": \"0.0.1\",\n  \"homepage\": \"https://github.com/mpneuried/grunt-soy-compile\",\n  \"author\": {\n    \"name\": \"Mathias Peter\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git://github.com/mpneuried/grunt-soy-compile.git\"\n  },\n  \"bugs\": {\n    \"url\": \"https://github.com/mpneuried/grunt-soy-compile/issues\"\n  },\n  \"licenses\": [\n    {\n      \"type\": \"MIT\",\n      \"url\": \"https://github.com/mpneuried/grunt-soy-compile/blob/master/LICENSE-MIT\"\n    }\n  ],\n  \"main\": \"Gruntfile.coffee\",\n  \"engines\": {\n    \"node\": \">= 0.8.0\"\n  },\n  \"scripts\": {\n    \"test\": \"grunt test\"\n  },\n  \"devDependencies\": {\n    \"grunt-contrib-jshint\": \"~0.1.1\",\n    \"grunt-contrib-nodeunit\": \"~0.1.2\",\n    \"grunt-contrib-clean\": \"~0.4.0\",\n    \"grunt-contrib-coffee\": \"~0.4.0\",\n    \"grunt-contrib-watch\": \"~0.2.0\",\n    \"grunt\": \"~0.4.0\"\n  },\n  \"peerDependencies\": {\n    \"grunt\": \"~0.4.0\"\n  },\n  \"keywords\": [\n    \"gruntplugin\"\n  ]\n}\n",
-			"file": "/Users/mathiaspeter/Dropbox/Dokumente/tcs/grunt-soy/grunt-soy/package.json",
-			"file_size": 1131,
-			"file_write_time": 1361455448000000,
-			"settings":
-			{
-				"buffer_size": 1131,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "Packages/Coffee-Script/Commands/CoffeeScript.sublime-build",
 	"command_palette":
@@ -139,6 +128,8 @@
 	},
 	"file_history":
 	[
+		"/Users/mathiaspeter/Sites/grunt-soy-compile/package.json",
+		"/Users/mathiaspeter/Dropbox/Dokumente/tcs/grunt-soy/grunt-soy/package.json",
 		"/Users/mathiaspeter/Sites/milonst/scripts/checkfailedworkers.coffee",
 		"/Users/mathiaspeter/Sites/milonst/node_modules/milon-modules/lib/workercreator-sqs.js",
 		"/Users/mathiaspeter/Sites/milonst/node_modules/awssum/lib/amazon/sqs-config.js",
@@ -264,9 +255,7 @@
 		"/Users/mathiaspeter/Sites/milonst/static/html/snippets/users/plans/plan_edit.ejs",
 		"/Users/mathiaspeter/Library/Application Support/Sublime Text 2/Packages/User/Base File.sublime-settings",
 		"/Users/mathiaspeter/Sites/milonst/static/html/snippets/users/training/poweredit.ejs",
-		"/Users/mathiaspeter/Sites/milonst/logs/undefined",
-		"/Users/mathiaspeter/Sites/milonst/logs/deviceapi.txt",
-		"/Users/mathiaspeter/Downloads/jquery-ui-1.8.17.custom/development-bundle/ui/jquery-ui-1.8.17.custom.js"
+		"/Users/mathiaspeter/Sites/milonst/logs/undefined"
 	],
 	"find":
 	{
@@ -485,37 +474,8 @@
 	"groups":
 	[
 		{
-			"selected": 0,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "/Users/mathiaspeter/Dropbox/Dokumente/tcs/grunt-soy/grunt-soy/package.json",
-					"settings":
-					{
-						"buffer_size": 1131,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								52,
-								148
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				}
 			]
 		}
 	],
