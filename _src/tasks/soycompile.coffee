@@ -85,7 +85,7 @@ class Compiler
 		_err = new Error()
 		_err.name = "missing-jar-path"
 		_err.message = "Before using grunt-soy-compile you have to define the jar paths by settng the option `jarPath`"
-		@grunt.warn( _err )
+		@grunt.fatal( _err )
 		return
 
 # function aggregator for non localized soy files
@@ -207,7 +207,8 @@ module.exports = ( grunt )->
 		# run all collected compile tasks
 		grunt.util.async.series aFns, ( err, result )=>
 			if err
-				grunt.warn( err )
+				grunt.log.error(err);
+				grunt.fail.warn('Soy failed to compile.');
 			else
 				grunt.log.debug( "RESULTS", result )
 			done()
