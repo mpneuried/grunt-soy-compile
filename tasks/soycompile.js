@@ -102,7 +102,7 @@
       _err = new Error();
       _err.name = "missing-jar-path";
       _err.message = "Before using grunt-soy-compile you have to define the jar paths by settng the option `jarPath`";
-      this.grunt.fail.fatal(_err);
+      this.grunt.warn(_err);
     };
 
     return Compiler;
@@ -208,7 +208,7 @@
       });
       grunt.util.async.series(aFns, function(err, result) {
         if (err) {
-          grunt.fail.warn(err);
+          grunt.warn(err);
         } else {
           grunt.log.debug("RESULTS", result);
         }

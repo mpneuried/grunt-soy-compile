@@ -207,7 +207,7 @@ module.exports = ( grunt )->
 		# run all collected compile tasks
 		grunt.util.async.series aFns, ( err, result )=>
 			if err
-				grunt.fail.warn( err )
+				grunt.warn( err )
 			else
 				grunt.log.debug( "RESULTS", result )
 			done()

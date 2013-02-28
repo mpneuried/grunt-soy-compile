@@ -181,5 +181,5 @@ grunt.initConfig({
 
 ## Release History
 	
- * 2013-02-28   v0.1.1   Do not kill watch task on compile error; Added solution for differnet `jarPath` per develeoper to readme.
+ * 2013-02-28   v0.1.2   Do not kill watch task on compile error; Added solution for differnet `jarPath` per develeoper to readme.
  * 2013-02-24   v0.1.0   Initial commit
