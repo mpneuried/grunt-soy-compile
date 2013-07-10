@@ -15,6 +15,5 @@ dump.rdb
 .DS_Store
 
 tmp
-.sublime*
-*.sublime-project
+*sublime*
 /npm-debug.log
