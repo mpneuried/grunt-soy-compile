@@ -1,5 +1,5 @@
 (function() {
-  var Compiler, exec, extractAndCompile, path, simpleCompile, soyC,
+  var Compiler, exec, extractAndCompile, fs, path, simpleCompile, soyC,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -7,10 +7,11 @@
 
   path = require("path");
 
+  fs = require("fs");
+
   soyC = null;
 
   Compiler = (function() {
-
     function Compiler(grunt) {
       this.grunt = grunt;
       this._jarPathError = __bind(this._jarPathError, this);
@@ -140,38 +141,63 @@
       f = _ref[_i];
       if (!(fileFilter != null ? fileFilter.length : void 0) || __indexOf.call(fileFilter, f) >= 0) {
         (function(f) {
-          var lang, _fn, _j, _len1, _ref1, _sourceLangs, _targetLangs,
-            _this = this;
+          var fnExtract, lang, _j, _len1, _ref1, _targetLangs;
           grunt.file.mkdir(options.extractmsgpath);
           _targetLangs = path.resolve(options.extractmsgpath);
-          _ref1 = options.languages;
-          _fn = function(f, lang) {
-            return aFns.push(function(cba) {
+          fnExtract = function(f, lang) {
+            aFns.push(function(cba) {
               var msgFile;
               msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf";
               grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".");
               soyC.soy2msg(path.resolve(f), _targetLangs + "/" + msgFile, lang, options.sourceLang, cba);
             });
           };
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            lang = _ref1[_j];
-            _fn(f, lang);
-          }
-          if (options.infusemsgpath != null) {
-            _sourceLangs = path.resolve(options.infusemsgpath);
+          if (options.singleLangXLIFF != null) {
+            fnExtract(f, options.singleLangXLIFF);
           } else {
-            _sourceLangs = _targetLangs;
+            _ref1 = options.languages;
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              lang = _ref1[_j];
+              fnExtract(f, lang);
+            }
           }
           return aFns.push(function(cba) {
-            var fname, msgFileFormat, outputPathFormat, _targetPath;
+            var fname, lng, msgFileFormat, outputPathFormat, _k, _langs, _len2, _ref2, _ref3, _ref4, _sourceLangs, _targetPath, _xlfFiles;
             _targetPath = path.resolve(file.dest).split(path.sep);
             _targetPath.pop();
             _targetPath = _targetPath.join(path.sep);
             fname = path.basename(f, ".soy");
             outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js";
+            if (options.singleLangXLIFF != null) {
+              _sourceLangs = path.resolve(options.infusemsgpath);
+              _xlfFiles = fs.readdirSync(_sourceLangs);
+              if (_ref2 = "" + fname + "_" + options.singleLangXLIFF + ".xlf", __indexOf.call(_xlfFiles, _ref2) < 0) {
+                grunt.fail.warn("Required XLIFF file `" + fname + "_" + options.singleLangXLIFF + ".xlf not found in path `" + _sourceLangs + "`");
+                return;
+              }
+              _langs = options.languages;
+            } else if (options.infusemsgpath != null) {
+              _sourceLangs = path.resolve(options.infusemsgpath);
+              _xlfFiles = fs.readdirSync(_sourceLangs);
+              _langs = [];
+              _ref3 = options.languages;
+              for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+                lng = _ref3[_k];
+                if (_ref4 = "" + fname + "_" + lng + ".xlf", __indexOf.call(_xlfFiles, _ref4) >= 0) {
+                  _langs.push(lng);
+                } else {
+                  grunt.log.warn("XLIFF File `" + fname + "_" + lng + ".xlf` not found so the language `" + lng + "` will be skipped.");
+                }
+              }
+            } else {
+              _sourceLangs = _targetLangs;
+              _langs = options.languages;
+            }
+            grunt.log.debug(path.basename(f, '.soy'));
             msgFileFormat = path.basename(f, '.soy') + "_{LOCALE}.xlf";
-            grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat.slice(process.cwd().length + 1) + ' using languages ' + options.languages.join(", ") + ".");
-            soyC.msg2js(path.resolve(f), _sourceLangs + "/" + msgFileFormat, outputPathFormat, options.languages.join(","), cba);
+            grunt.log.debug(msgFileFormat);
+            grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat.slice(process.cwd().length + 1) + ' using languages ' + _langs.join(", ") + "." + _sourceLangs);
+            soyC.msg2js(path.resolve(f), _sourceLangs + "/" + msgFileFormat, outputPathFormat, _langs.join(","), cba);
           });
         })(f);
       }
@@ -192,6 +218,7 @@
         extractmsgpath: null,
         infusemsgpath: null,
         sourceLang: "en_GB",
+        singleLangXLIFF: null,
         languages: []
       });
       soyC.setJarPath(options.jarPath);

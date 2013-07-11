@@ -40,7 +40,7 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/test"
 				options:
-					jarPath: "/Library/tcs_utils"
+					jarPath: "~/local/soy/"
 
 			testLang:
 				expand: true
@@ -48,7 +48,7 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/testLang"
 				options:
-					jarPath: "/Library/tcs_utils"
+					jarPath: "~/local/soy/"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB" ]
@@ -60,15 +60,41 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/testLangExtLangIn"
 				options:
-					jarPath: "/Library/tcs_utils"
+					jarPath: "~/local/soy/"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB" ]
 					extractmsgpath: "tmp/lang_out"
 					infusemsgpath: "test/lang_in"
 
+			testLangExtLangInMissingXLIFF:
+				expand: true
+				cwd: 'test/tmpls',
+				src: ["*.soy"]
+				dest: "tmp/testLangExtLangInSingleExtract"
+				options:
+					jarPath: "~/local/soy/"
+					msgextract: true
+					sourceLang: "de_DE"
+					languages: [ "de_DE", "en_GB", "jp_JP", "cz_CN" ]
+					extractmsgpath: "tmp/lang_out"
+					infusemsgpath: "test/lang_in"
 
-		
+			testLangExtLangInSingleExtract:
+				expand: true
+				cwd: 'test/tmpls',
+				src: ["*.soy"]
+				dest: "tmp/testLangExtLangInSingleExtract"
+				options:
+					jarPath: "~/local/soy/"
+					msgextract: true
+					sourceLang: "de_DE"
+					languages: [ "de_DE", "en_GB" ]
+					singleLangXLIFF: "de_DE"
+					extractmsgpath: "tmp/lang_out"
+					infusemsgpath: "test/lang_in"
+
+
 		# Unit tests.
 		nodeunit:
 			tests: ["test/*_test.js"]

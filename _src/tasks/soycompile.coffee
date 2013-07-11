@@ -1,5 +1,6 @@
 exec = require('child_process').exec
 path = require( "path" )
+fs = require( "fs" )
 
 soyC = null
 
@@ -62,7 +63,6 @@ class Compiler
 
 	# call java jar and return the results
 	_compile: ( path, file, args, cb )=>
-
 		_command = "java -jar #{ path } "
 		for key, val of args
 			_command += "--#{ key } #{ val } "
@@ -116,6 +116,8 @@ simpleCompile = ( aFns, file, options, grunt, fileFilter )->
 extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 	for f in file.src
 		
+
+
 		# filter if its a call during a regard file change
 		if not fileFilter?.length or f in fileFilter
 			do( f )->
@@ -126,24 +128,27 @@ extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 				# set xliff targets
 				_targetLangs = path.resolve( options.extractmsgpath ) 
 				
-				for lang in options.languages
-					do( f, lang )=>
-						# add a extract task
-						aFns.push ( cba )->
-							# create path to the xliff file per language
-							msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf"
+				fnExtract = ( f, lang )->
+					# add a extract task
+					aFns.push ( cba )->
 
-							grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".")
-							
-							# run the soy extract 
-							soyC.soy2msg( path.resolve( f ), _targetLangs + "/" + msgFile, lang, options.sourceLang, cba )
-							return
+						# create path to the xliff file per language
+						msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf"
 
-				# ceck if the xliff exports differ from the xliff imports
-				if options.infusemsgpath?
-					_sourceLangs = path.resolve( options.infusemsgpath )
+						grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".")
+						
+						# run the soy extract 
+						soyC.soy2msg( path.resolve( f ), _targetLangs + "/" + msgFile, lang, options.sourceLang, cba )
+						return
+					return
+				
+				if options.singleLangXLIFF?
+					fnExtract( f, options.singleLangXLIFF )
 				else
-					_sourceLangs = _targetLangs
+					for lang in options.languages
+						fnExtract( f, lang )
+				
+
 
 				# add a compile task
 				aFns.push ( cba )->
@@ -154,13 +159,41 @@ extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 					_targetPath = _targetPath.join( path.sep )
 					fname = path.basename( f, ".soy" )
 					outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js"
+					# ceck if the xliff exports differ from the xliff imports
+					
+					if options.singleLangXLIFF?
+						_sourceLangs = path.resolve( options.infusemsgpath )
+						_xlfFiles = fs.readdirSync( _sourceLangs )
+						if "#{fname}_#{ options.singleLangXLIFF }.xlf" not in _xlfFiles
+							grunt.fail.warn("Required XLIFF file `#{fname}_#{ options.singleLangXLIFF }.xlf not found in path `#{_sourceLangs}`");
+							return
+						_langs = options.languages
+
+					else if options.infusemsgpath?
+						_sourceLangs = path.resolve( options.infusemsgpath )
+						_xlfFiles = fs.readdirSync( _sourceLangs )
+
+						_langs = []
+						for lng in options.languages
+							if "#{fname}_#{ lng }.xlf" in _xlfFiles
+								_langs.push( lng )
+							else
+								grunt.log.warn("XLIFF File `#{fname}_#{ lng }.xlf` not found so the language `#{lng}` will be skipped.")
+					else
+						_sourceLangs = _targetLangs
+						_langs = options.languages
+
+					grunt.log.debug(path.basename(f, '.soy') )
 
 					# calculate the path to the xliff files
+					
 					msgFileFormat = path.basename(f, '.soy') + "_{LOCALE}.xlf"
-					grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + options.languages.join( ", " ) + ".")
+
+					grunt.log.debug( msgFileFormat )
+					grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + _langs.join( ", " ) + "." + _sourceLangs)
 
 					# run the soy compile 
-					soyC.msg2js( path.resolve( f ), _sourceLangs + "/" + msgFileFormat, outputPathFormat, options.languages.join( "," ), cba )
+					soyC.msg2js( path.resolve( f ), _sourceLangs + "/" + msgFileFormat, outputPathFormat, _langs.join( "," ), cba )
 					return
 	
 	aFns
@@ -185,6 +218,7 @@ module.exports = ( grunt )->
 			extractmsgpath: null
 			infusemsgpath: null
 			sourceLang: "en_GB"
+			singleLangXLIFF: null
 			languages: []
 
 		# set the jsr path out of `options.jarPath`

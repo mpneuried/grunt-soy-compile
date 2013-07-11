@@ -86,6 +86,14 @@ Default: []
 
 An array of languages the compiler will generate.
 
+#### singleLangXLIFF
+
+Type: `String`
+Default: `null`
+*only relevant if `msgextract = true`*
+
+By setting this value to a language code of `languages` it will only generate one xliff file.
+
 
 ### Usage Examples
 
@@ -123,6 +131,7 @@ soycompile: {
 			msgextract: true,
 			sourceLang: "en_GB",
 			languages: [ "en_GB", "de_DE", "jp_JP" ],
+			singleLangXLIFF: "de_DE"
 			extractmsgpath: "relative/path/for/generated/xliffs",
 			infusemsgpath: "relative/path/to/translated/xliffs"
 		}
@@ -180,6 +189,8 @@ grunt.initConfig({
  * implement test cases to check for correct template generation.
 
 ## Release History
-	
- * 2013-02-28   v0.1.3   Do not kill watch task on compile error; Added solution for differnet `jarPath` per develeoper to readme.
- * 2013-02-24   v0.1.0   Initial commit
+|Version|Date|Description|
+|:--:|:--:|:--|
+|v0.2.0|2013-07-11|Added option `singleLangXLIFF` and a check  and skip for not existing xliff-files within the `infusemsgpath`.|
+|v0.1.3|2013-02-28|Do not kill watch task on compile error; Added solution for differnet `jarPath` per develeoper to readme.|
+|v0.1.0|2013-02-24|Initial commit|
