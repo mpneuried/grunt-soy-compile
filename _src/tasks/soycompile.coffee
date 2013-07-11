@@ -161,7 +161,7 @@ extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 					outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js"
 					# ceck if the xliff exports differ from the xliff imports
 					
-					if options.singleLangXLIFF?
+					if options.infusemsgpath? and options.singleLangXLIFF?
 						_sourceLangs = path.resolve( options.infusemsgpath )
 						_xlfFiles = fs.readdirSync( _sourceLangs )
 						if "#{fname}_#{ options.singleLangXLIFF }.xlf" not in _xlfFiles

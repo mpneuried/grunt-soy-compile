@@ -168,7 +168,7 @@
             _targetPath = _targetPath.join(path.sep);
             fname = path.basename(f, ".soy");
             outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js";
-            if (options.singleLangXLIFF != null) {
+            if ((options.infusemsgpath != null) && (options.singleLangXLIFF != null)) {
               _sourceLangs = path.resolve(options.infusemsgpath);
               _xlfFiles = fs.readdirSync(_sourceLangs);
               if (_ref2 = "" + fname + "_" + options.singleLangXLIFF + ".xlf", __indexOf.call(_xlfFiles, _ref2) < 0) {

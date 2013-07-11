@@ -191,6 +191,7 @@ grunt.initConfig({
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.2.1|2013-07-11|Small bugfix|
 |v0.2.0|2013-07-11|Added option `singleLangXLIFF` and a check  and skip for not existing xliff-files within the `infusemsgpath`.|
 |v0.1.3|2013-02-28|Do not kill watch task on compile error; Added solution for differnet `jarPath` per develeoper to readme.|
 |v0.1.0|2013-02-24|Initial commit|
