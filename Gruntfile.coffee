@@ -10,7 +10,7 @@ module.exports = (grunt) ->
 	
 	# Project configuration.
 	grunt.initConfig
-		#regarde:
+		#watch:
 		#	options: 
 		#		spawn: false
 		regarde:
@@ -63,6 +63,7 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/testLangExtLangIn"
 				options:
+					isUsingIjData: true
 					jarPath: "~/local/soy/"
 					msgextract: true
 					sourceLang: "de_DE"

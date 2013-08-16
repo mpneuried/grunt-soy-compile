@@ -7,7 +7,7 @@ soyC = null
 # a compiling helper
 class Compiler
 	constructor: ( @grunt )->
-
+		@isUsingIjData = false
 		return
 
 	# set the path to the jar files
@@ -19,6 +19,10 @@ class Compiler
 			@grunt.verbose.writeflags( { compiler: @soyCom, msgext: @msgExt }, 'Jar Paths')
 		else
 			@_jarPathError()
+		return
+
+	useIjData: =>
+		@isUsingIjData = true
 		return
 
 	# compile a js template out of a soy file
@@ -57,6 +61,9 @@ class Compiler
 			outputPathFormat: output
 			locales: langs
 
+		if @isUsingIjData
+			args.isUsingIjData = true
+
 		@grunt.verbose.writeflags( args, "Args" )
 		@_compile( @soyCom, file, args, cb )
 		return
@@ -65,7 +72,10 @@ class Compiler
 	_compile: ( path, file, args, cb )=>
 		_command = "java -jar #{ path } "
 		for key, val of args
-			_command += "--#{ key } #{ val } "
+			if @grunt.util._.isBoolean( val ) and val is true
+				_command += "--#{ key } "	
+			else
+				_command += "--#{ key } #{ val } "
 
 		_command += file
 
@@ -235,6 +245,9 @@ module.exports = ( grunt )->
 
 		# set the jsr path out of `options.jarPath`
 		soyC.setJarPath( options.jarPath )
+		
+		if options.isUsingIjData
+			soyC.useIjData()
 
 		grunt.verbose.writeflags(options, 'Options')
 

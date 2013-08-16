@@ -94,6 +94,12 @@ Default: `null`
 
 By setting this value to a language code of `languages` it will only generate one xliff file.
 
+#### isUsingIjData
+
+Type: `Boolean`
+Default: `false`
+
+Add's the compile param `--isUsingIjData`.
 
 ### Usage Examples
 
@@ -192,6 +198,7 @@ grunt.initConfig({
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.3.1|2013-08-16|Added compile param `isUsingIjData`|
 |v0.3.0|2013-08-16|Added single file compile with `grunt-contrib-watch`, but only with the watch option `spawn: false`|
 |v0.2.1|2013-07-11|Small bugfix|
 |v0.2.0|2013-07-11|Added option `singleLangXLIFF` and a check  and skip for not existing xliff-files within the `infusemsgpath`.|

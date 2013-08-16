@@ -19,7 +19,9 @@
       this.msg2js = __bind(this.msg2js, this);
       this.soy2msg = __bind(this.soy2msg, this);
       this.soy2js = __bind(this.soy2js, this);
+      this.useIjData = __bind(this.useIjData, this);
       this.setJarPath = __bind(this.setJarPath, this);
+      this.isUsingIjData = false;
       return;
     }
 
@@ -34,6 +36,10 @@
       } else {
         this._jarPathError();
       }
+    };
+
+    Compiler.prototype.useIjData = function() {
+      this.isUsingIjData = true;
     };
 
     Compiler.prototype.soy2js = function(file, output, cb) {
@@ -75,6 +81,9 @@
         outputPathFormat: output,
         locales: langs
       };
+      if (this.isUsingIjData) {
+        args.isUsingIjData = true;
+      }
       this.grunt.verbose.writeflags(args, "Args");
       this._compile(this.soyCom, file, args, cb);
     };
@@ -85,7 +94,11 @@
       _command = "java -jar " + path + " ";
       for (key in args) {
         val = args[key];
-        _command += "--" + key + " " + val + " ";
+        if (this.grunt.util._.isBoolean(val) && val === true) {
+          _command += "--" + key + " ";
+        } else {
+          _command += "--" + key + " " + val + " ";
+        }
       }
       _command += file;
       this.grunt.verbose.writeln(_command);
@@ -238,6 +251,9 @@
         languages: []
       });
       soyC.setJarPath(options.jarPath);
+      if (options.isUsingIjData) {
+        soyC.useIjData();
+      }
       grunt.verbose.writeflags(options, 'Options');
       aFns = [];
       this.files.forEach(function(file) {
