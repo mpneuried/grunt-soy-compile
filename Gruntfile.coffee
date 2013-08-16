@@ -10,6 +10,9 @@ module.exports = (grunt) ->
 	
 	# Project configuration.
 	grunt.initConfig
+		#regarde:
+		#	options: 
+		#		spawn: false
 		regarde:
 			tasks:
 				files: ["_src/tasks/*.coffee"]
@@ -108,6 +111,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks "grunt-contrib-nodeunit"
 	# just for developing this plugin
 	grunt.loadNpmTasks "grunt-regarde"
+	#grunt.loadNpmTasks "grunt-contrib-watch"
 	grunt.loadNpmTasks "grunt-contrib-coffee"
 	
 	grunt.registerTask "watch", "regarde"

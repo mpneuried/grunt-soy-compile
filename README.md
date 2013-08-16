@@ -143,9 +143,10 @@ For more examples on how to use the `expand` API shown in the `glob_to_multiple`
 
 ### Additional info
 
-#### grunt-regards
+#### Compile only a single file
 
-- if you use `grunt-regards` instaed of `grunt-contrib-watch` to track chnaging files, the compiler will only compile the changed file.
+- if you use `grunt-regards` instead of `grunt-contrib-watch` to track chnaging files, the compiler will only compile the changed file.
+- if you want to compile only the changed file by `grunt-contrib-watch` you have to define the watch option`options: { spawn: false }`, beause with a spawned task i can not catch the `changed` event through multiple threads.
 
 #### differnet `jarPaths`
 
@@ -191,6 +192,7 @@ grunt.initConfig({
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.3.0|2013-08-16|Added single file compile with `grunt-contrib-watch`, but only with the watch option `spawn: false`|
 |v0.2.1|2013-07-11|Small bugfix|
 |v0.2.0|2013-07-11|Added option `singleLangXLIFF` and a check  and skip for not existing xliff-files within the `infusemsgpath`.|
 |v0.1.3|2013-02-28|Do not kill watch task on compile error; Added solution for differnet `jarPath` per develeoper to readme.|

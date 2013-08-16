@@ -115,8 +115,6 @@ simpleCompile = ( aFns, file, options, grunt, fileFilter )->
 # function aggregator for localized soy files
 extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 	for f in file.src
-		
-
 
 		# filter if its a call during a regard file change
 		if not fileFilter?.length or f in fileFilter
@@ -198,15 +196,29 @@ extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 	
 	aFns
 
+# global handler to find changed files by `grunt-contrib-watch`
+watchChanged = null
 module.exports = ( grunt )->
+
+	grunt.event.on 'watch', ( action,filepath  )->
+		if action is "changed"
+			watchChanged = [] if not watchChanged?
+			watchChanged.push filepath
+		return
 
 	# init the compiler module
 	soyC = new Compiler( grunt, path.resolve( __dirname + "/../_java/" ) )
 
 	grunt.registerMultiTask "soycompile", "Compile soy files", ->
 
-		# get the chnaged files from the regarde task
-		changed = grunt.regarde?.changed or []
+		if watchChanged?.length
+			# get the changed `grunt-contrib-watch` file
+			changed = watchChanged
+			watchChanged = null
+		else
+			# get the changed files from the regarde task
+			changed = grunt.regarde?.changed or []
+		grunt.log.debug( "File filter: #{ JSON.stringify( changed ) }")
 
 		# set as async task
 		done = this.async()

@@ -1,5 +1,5 @@
 (function() {
-  var Compiler, exec, extractAndCompile, fs, path, simpleCompile, soyC,
+  var Compiler, exec, extractAndCompile, fs, path, simpleCompile, soyC, watchChanged,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -205,12 +205,28 @@
     return aFns;
   };
 
+  watchChanged = null;
+
   module.exports = function(grunt) {
+    grunt.event.on('watch', function(action, filepath) {
+      if (action === "changed") {
+        if (watchChanged == null) {
+          watchChanged = [];
+        }
+        watchChanged.push(filepath);
+      }
+    });
     soyC = new Compiler(grunt, path.resolve(__dirname + "/../_java/"));
     grunt.registerMultiTask("soycompile", "Compile soy files", function() {
       var aFns, changed, done, options, _ref,
         _this = this;
-      changed = ((_ref = grunt.regarde) != null ? _ref.changed : void 0) || [];
+      if (watchChanged != null ? watchChanged.length : void 0) {
+        changed = watchChanged;
+        watchChanged = null;
+      } else {
+        changed = ((_ref = grunt.regarde) != null ? _ref.changed : void 0) || [];
+      }
+      grunt.log.debug("File filter: " + (JSON.stringify(changed)));
       done = this.async();
       options = this.options({
         jarPath: null,
