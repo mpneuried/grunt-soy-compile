@@ -137,7 +137,7 @@
             _targetPath.pop();
             _targetPath = _targetPath.join(path.sep);
             fname = path.basename(f, ".soy");
-            _target = _targetPath + "/" + fname + ".js";
+            _target = _targetPath + "/" + fname + options.ext;
             grunt.log.writeln('Compile ' + f + ' to ' + _target.slice(process.cwd().length + 1) + ".");
             soyC.soy2js(path.resolve(f), _target, cba);
           });
@@ -180,7 +180,7 @@
             _targetPath.pop();
             _targetPath = _targetPath.join(path.sep);
             fname = path.basename(f, ".soy");
-            outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js";
+            outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}" + options.ext;
             if ((options.infusemsgpath != null) && (options.singleLangXLIFF != null)) {
               _sourceLangs = path.resolve(options.infusemsgpath);
               _xlfFiles = fs.readdirSync(_sourceLangs);
@@ -241,6 +241,7 @@
       }
       grunt.log.debug("File filter: " + (JSON.stringify(changed)));
       done = this.async();
+      grunt.log.debug("File filter: " + (JSON.stringify(changed)));
       options = this.options({
         jarPath: null,
         msgextract: false,
@@ -248,7 +249,8 @@
         infusemsgpath: null,
         sourceLang: "en_GB",
         singleLangXLIFF: null,
-        languages: []
+        languages: [],
+        ext: ".js"
       });
       soyC.setJarPath(options.jarPath);
       if (options.isUsingIjData) {

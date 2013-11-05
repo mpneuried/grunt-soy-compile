@@ -44,6 +44,7 @@ module.exports = (grunt) ->
 				dest: "tmp/test"
 				options:
 					jarPath: "~/local/soy/"
+					ext: ".soy.js"
 
 			testLang:
 				expand: true
@@ -78,6 +79,7 @@ module.exports = (grunt) ->
 				dest: "tmp/testLangExtLangInSingleExtract"
 				options:
 					jarPath: "~/local/soy/"
+					ext: ".soy.js"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB", "jp_JP", "cz_CN" ]

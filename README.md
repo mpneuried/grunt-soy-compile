@@ -41,6 +41,13 @@ You can download the **jar** files here:
 - [ SoyMsgExtractor ](http://closure-templates.googlecode.com/files/closure-templates-msg-extractor-latest.zip)
 
 
+#### ext
+
+Type: `String`
+Default: ".js"
+
+The used file extension for the compiled template JS Files.
+
 #### msgextract
 
 Type: `Boolean`
@@ -198,6 +205,7 @@ grunt.initConfig({
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.4.0|2013-10-05|Added compile options `ext` to define the generated file extension |
 |v0.3.1|2013-08-16|Added compile param `isUsingIjData`|
 |v0.3.0|2013-08-16|Added single file compile with `grunt-contrib-watch`, but only with the watch option `spawn: false`|
 |v0.2.1|2013-07-11|Small bugfix|

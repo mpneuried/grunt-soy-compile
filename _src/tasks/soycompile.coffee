@@ -112,7 +112,7 @@ simpleCompile = ( aFns, file, options, grunt, fileFilter )->
 					_targetPath.pop()
 					_targetPath = _targetPath.join( path.sep )
 					fname = path.basename( f, ".soy" )
-					_target = _targetPath + "/" + fname + ".js"
+					_target = _targetPath + "/" + fname + options.ext
 
 					grunt.log.writeln('Compile ' + f + ' to ' + _target[process.cwd().length+1..] + ".")
 
@@ -166,7 +166,7 @@ extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 					_targetPath.pop()
 					_targetPath = _targetPath.join( path.sep )
 					fname = path.basename( f, ".soy" )
-					outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}.js"
+					outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}" + options.ext
 					# ceck if the xliff exports differ from the xliff imports
 					
 					if options.infusemsgpath? and options.singleLangXLIFF?
@@ -233,6 +233,9 @@ module.exports = ( grunt )->
 		# set as async task
 		done = this.async()
 
+		grunt.log.debug( "File filter: #{ JSON.stringify( changed ) }")
+
+
 		# set default options
 		options = this.options
 			jarPath: null
@@ -242,6 +245,7 @@ module.exports = ( grunt )->
 			sourceLang: "en_GB"
 			singleLangXLIFF: null
 			languages: []
+			ext: ".js"
 
 		# set the jsr path out of `options.jarPath`
 		soyC.setJarPath( options.jarPath )
