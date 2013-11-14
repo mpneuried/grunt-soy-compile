@@ -198,9 +198,9 @@ grunt.initConfig({
 });
 ```
 
-## Attension
+## Attention
 
-You have to be carefull with the filename containing multiple dots!
+You have to be carefull with filenames containing multiple dots!
 I had this problem by uglifing my generated soy templates.
 See this grunt [issue](https://github.com/gruntjs/grunt/pull/750) for more information and this [StackOverflow](http://stackoverflow.com/questions/16697344/configure-grunt-file-name-matching-for-files-with-multiple-dots) question for a solution.
 
