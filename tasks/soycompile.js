@@ -1,5 +1,5 @@
 (function() {
-  var Compiler, exec, extractAndCompile, fs, path, simpleCompile, soyC, watchChanged,
+  var Compiler, async, exec, extractAndCompile, fs, path, simpleCompile, soyC, watchChanged,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -8,6 +8,8 @@
   path = require("path");
 
   fs = require("fs");
+
+  async = require("async");
 
   soyC = null;
 
@@ -94,7 +96,7 @@
       _command = "java -jar " + path + " ";
       for (key in args) {
         val = args[key];
-        if (this.grunt.util._.isBoolean(val) && val === true) {
+        if (val === true) {
           _command += "--" + key + " ";
         } else {
           _command += "--" + key + " " + val + " ";
@@ -267,7 +269,7 @@
           simpleCompile(aFns, file, options, grunt, changed);
         }
       });
-      grunt.util.async.series(aFns, function(err, result) {
+      async.series(aFns, function(err, result) {
         if (err) {
           grunt.log.error(err);
           grunt.fail.warn('Soy failed to compile.');

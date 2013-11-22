@@ -2,6 +2,8 @@ exec = require('child_process').exec
 path = require( "path" )
 fs = require( "fs" )
 
+async = require( "async" )
+
 soyC = null
 
 # a compiling helper
@@ -72,7 +74,7 @@ class Compiler
 	_compile: ( path, file, args, cb )=>
 		_command = "java -jar #{ path } "
 		for key, val of args
-			if @grunt.util._.isBoolean( val ) and val is true
+			if val is true
 				_command += "--#{ key } "	
 			else
 				_command += "--#{ key } #{ val } "
@@ -268,7 +270,7 @@ module.exports = ( grunt )->
 			return		
 
 		# run all collected compile tasks
-		grunt.util.async.series aFns, ( err, result )=>
+		async.series aFns, ( err, result )=>
 			if err
 				grunt.log.error(err);
 				grunt.fail.warn('Soy failed to compile.');

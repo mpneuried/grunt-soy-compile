@@ -211,6 +211,7 @@ See this grunt [issue](https://github.com/gruntjs/grunt/pull/750) for more infor
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.4.1|2013-11-22|Updated dependencies to match Grunt 0.4.2 |
 |v0.4.0|2013-10-05|Added compile options `ext` to define the generated file extension |
 |v0.3.1|2013-08-16|Added compile param `isUsingIjData`|
 |v0.3.0|2013-08-16|Added single file compile with `grunt-contrib-watch`, but only with the watch option `spawn: false`|
