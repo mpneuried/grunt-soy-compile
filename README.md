@@ -101,12 +101,36 @@ Default: `null`
 
 By setting this value to a language code of `languages` it will only generate one xliff file.
 
-#### isUsingIjData
+#### compileflags
+
+Type: `Object`
+Default: `null`
+
+You can use this option to define your required compile flags. See [Javascrip useage docs](https://developers.google.com/closure/templates/docs/javascript_usage).
+
+Example: 
+
+	```
+		src: ['test/tmpls/test.soy', 'test/tmpls/test.nr2.soy']
+		dest: 'tmp/testCombined/flags.js'
+		options:
+			jarPath: "~/local/soy"
+			compileflags:
+				shouldGenerateJsdoc: true
+				shouldProvideRequireSoyNamespaces: true
+				shouldDeclareTopLevelNamespaces: true
+				codeStyle: "concat"
+	```
+
+
+#### isUsingIjData [ deprecated ]
 
 Type: `Boolean`
 Default: `false`
 
 Add's the compile param `--isUsingIjData`.
+
+**NOTE:** This feature is deprecated. So please use the `compileflags` option.
 
 ### Usage Examples
 
@@ -127,6 +151,23 @@ soycompile: {
 	}
 }
 ```
+
+#### to one file
+
+A simple to compile multiple soy files into one single js file.
+
+```js
+soycompile: {
+	mytask: {
+		src: ['test/tmpls/**/*.soy']
+		dest: 'relative/path/for/results/myTemplates.js'
+		options: {
+			jarPath: "/absolute/path/to/the/jar/files"
+		}
+	}
+}
+```
+
 
 #### complex
 
@@ -151,6 +192,8 @@ soycompile: {
 	}
 }
 ```
+
+**NOTE:** If you use the "to one file" Syntax ( using without `expand: true` ) the generated xliff files will also be generated info and are required to infuse by a single file per language ( e.g. `relative/path/for/generated/xliffs/myTemplates_de_de.xlf`, `relative/path/for/generated/xliffs/myTemplates_gb_en.xlf`, ... ).
 
 For more examples on how to use the `expand` API shown in the `glob_to_multiple` example, see "Building the files object dynamically" in the grunt wiki entry [Configuring Tasks](http://gruntjs.com/configuring-tasks).
 
@@ -211,6 +254,7 @@ See this grunt [issue](https://github.com/gruntjs/grunt/pull/750) for more infor
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.5.0|2013-02-26|Added handling to compile soyfiles to one js file ( Issue #5 ); Added `compileflags` to ba able to configure the Soy compiler jar ( Issue #6) |
 |v0.4.1|2013-11-22|Updated dependencies to match Grunt 0.4.2 |
 |v0.4.0|2013-10-05|Added compile options `ext` to define the generated file extension |
 |v0.3.1|2013-08-16|Added compile param `isUsingIjData`|

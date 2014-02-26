@@ -43,7 +43,7 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/test"
 				options:
-					jarPath: "~/local/soy/"
+					jarPath: "~/local/soy"
 					ext: ".soy.js"
 
 			testLang:
@@ -52,7 +52,7 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/testLang"
 				options:
-					jarPath: "~/local/soy/"
+					jarPath: "~/local/soy"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB" ]
@@ -65,7 +65,7 @@ module.exports = (grunt) ->
 				dest: "tmp/testLangExtLangIn"
 				options:
 					isUsingIjData: true
-					jarPath: "~/local/soy/"
+					jarPath: "~/local/soy"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB" ]
@@ -78,7 +78,7 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/testLangExtLangInSingleExtract"
 				options:
-					jarPath: "~/local/soy/"
+					jarPath: "~/local/soy"
 					ext: ".soy.js"
 					msgextract: true
 					sourceLang: "de_DE"
@@ -92,13 +92,64 @@ module.exports = (grunt) ->
 				src: ["*.soy"]
 				dest: "tmp/testLangExtLangInSingleExtract"
 				options:
-					jarPath: "~/local/soy/"
+					jarPath: "~/local/soy"
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB" ]
 					singleLangXLIFF: "de_DE"
 					extractmsgpath: "tmp/lang_out"
 					infusemsgpath: "test/lang_in"
+
+			combineToOneFile:
+				src: ['test/tmpls/test.soy', 'test/tmpls/test.nr2.soy']
+				dest: 'tmp/testCombined/combined.js'
+				options:
+					jarPath: "~/local/soy"
+
+			combineToOneFileComplexSingleExtract:
+				src: ['test/tmpls/test.soy', 'test/tmpls/test.nr2.soy']
+				dest: 'tmp/testCombined/combinedComplex.js'
+				options:
+					jarPath: "~/local/soy"
+					msgextract: true
+					sourceLang: "de_DE"
+					languages: [ "de_DE", "en_GB" ]
+					singleLangXLIFF: "de_DE"
+					extractmsgpath: "tmp/lang_out"
+					infusemsgpath: "test/lang_in"
+
+			combineToOneFileComplex:
+				src: ['test/tmpls/test.soy', 'test/tmpls/test.nr2.soy']
+				dest: 'tmp/testCombined/combinedComplex.js'
+				options:
+					jarPath: "~/local/soy"
+					msgextract: true
+					sourceLang: "de_DE"
+					languages: [ "de_DE", "en_GB", "jp_JP", "cz_CN" ]
+					extractmsgpath: "tmp/lang_out"
+					infusemsgpath: "test/lang_in"
+
+			combineToOneFileComplexWildcard:
+				src: ['test/tmpls/**/*.soy']
+				dest: 'tmp/testCombinedWildcard/combinedComplex.js'
+				options:
+					jarPath: "~/local/soy"
+					msgextract: true
+					sourceLang: "de_DE"
+					languages: [ "de_DE", "en_GB", "jp_JP", "cz_CN" ]
+					extractmsgpath: "tmp/lang_out"
+					infusemsgpath: "test/lang_in"
+
+			usingCompileFlags:
+				src: ['test/tmpls/test.soy', 'test/tmpls/test.nr2.soy']
+				dest: 'tmp/testCombined/flags.js'
+				options:
+					jarPath: "~/local/soy"
+					compileflags:
+						shouldGenerateJsdoc: true
+						shouldProvideRequireSoyNamespaces: true
+						shouldDeclareTopLevelNamespaces: true
+						codeStyle: "concat"
 
 
 		# Unit tests.

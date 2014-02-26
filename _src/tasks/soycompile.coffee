@@ -9,7 +9,7 @@ soyC = null
 # a compiling helper
 class Compiler
 	constructor: ( @grunt )->
-		@isUsingIjData = false
+		@compileflags = {}
 		return
 
 	# set the path to the jar files
@@ -23,9 +23,10 @@ class Compiler
 			@_jarPathError()
 		return
 
-	useIjData: =>
-		@isUsingIjData = true
+	addFlag: ( key, value )->
+		@compileflags[ key ] = value
 		return
+
 
 	# compile a js template out of a soy file
 	soy2js: ( file, output, cb )=>
@@ -34,7 +35,12 @@ class Compiler
 			return
 		args = 
 			outputPathFormat: output
-		@grunt.verbose.writeflags( args, "Args" )
+
+		@grunt.verbose.writeflags( @compileflags, "Flags" )
+		for _k, _v of @compileflags
+			args[ _k ] = _v
+
+		@grunt.verbose.writeflags( args, "SOY2JS Args" )
 		@_compile( @soyCom, file, args, cb )
 
 		return
@@ -49,7 +55,7 @@ class Compiler
 			targetLocaleString: lang
 			sourceLocaleString: sourcelang
 
-		@grunt.verbose.writeflags( args, "Args" )
+		@grunt.verbose.writeflags( args, "SOY2MSG Args" )
 		@_compile( @msgExt, file, args, cb )
 		return
 
@@ -63,10 +69,11 @@ class Compiler
 			outputPathFormat: output
 			locales: langs
 
-		if @isUsingIjData
-			args.isUsingIjData = true
+		@grunt.verbose.writeflags( @compileflags, "Flags" )
+		for _k, _v of @compileflags
+			args[ _k ] = _v
 
-		@grunt.verbose.writeflags( args, "Args" )
+		@grunt.verbose.writeflags( args, "MSG2JS Args" )
 		@_compile( @soyCom, file, args, cb )
 		return
 
@@ -79,7 +86,13 @@ class Compiler
 			else
 				_command += "--#{ key } #{ val } "
 
-		_command += file
+		if Array.isArray( file )
+			if path.indexOf( "SoyToJsSrcCompiler" ) >= 0
+				_command += "--srcs #{ file.join(',') } "
+			else
+				_command += file.join(' ')
+		else
+			_command += file
 
 		@grunt.verbose.writeln( _command )
 
@@ -102,7 +115,8 @@ class Compiler
 
 # function aggregator for non localized soy files
 simpleCompile = ( aFns, file, options, grunt, fileFilter )->
-	for f in file.src
+	if file.src.length is 1
+		f = file.src[0]
 		
 		# filter if its a call during a regard file change
 		if not fileFilter?.length or f in fileFilter
@@ -121,90 +135,131 @@ simpleCompile = ( aFns, file, options, grunt, fileFilter )->
 					# run the soy compile 
 					soyC.soy2js( path.resolve( f ), _target, cba )
 					return
+	else if file.src.length > 1
+		aFns.push ( cba )->
+			# calculate the final template file path
+			_target = path.resolve( file.dest )
 
+			grunt.log.writeln('Compile ' + file.src.join( "', '" ) + ' to ' + _target[process.cwd().length+1..] + ".")
+
+			# run the soy compile 
+			_files = []
+			_files.push path.resolve( f ) for f in file.src
+				
+			soyC.soy2js( _files, _target, cba )
+			return
 	aFns
 
 # function aggregator for localized soy files
 extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
-	for f in file.src
+
+	fnCompile = ( f )->
+		# create target folder  if not exists
+		grunt.file.mkdir( options.extractmsgpath )
+
+		# set xliff targets
+		_targetLangs = path.resolve( options.extractmsgpath ) 
+		
+		fnExtract = ( f, lang )->
+			# add a extract task
+			aFns.push ( cba )->
+
+				# create path to the xliff file per language
+				if Array.isArray( f )
+					msgFile = path.basename(file.dest, '.js') + "_" + lang + ".xlf"
+				else
+					msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf"
+
+				grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".")
+				
+				if Array.isArray( f )
+					_files = []
+					_files.push path.resolve( _file ) for _file in f
+				else
+					_files = path.resolve( f )
+
+				# run the soy extract 
+				soyC.soy2msg( _files, _targetLangs + "/" + msgFile, lang, options.sourceLang, cba )
+				return
+			return
+		
+		
+		if options.singleLangXLIFF?
+			fnExtract( f, options.singleLangXLIFF )
+		else
+			for lang in options.languages
+				fnExtract( f, lang )
+		
+
+
+		# add a compile task
+		aFns.push ( cba )->
+
+			# calculate the final template file path
+			_targetPath = path.resolve( file.dest ).split(path.sep)
+			_targetPath.pop()
+			_targetPath = _targetPath.join( path.sep )
+			if Array.isArray( f )
+				fname = path.basename( file.dest, ".js" )
+			else
+				fname = path.basename( f, ".soy" )
+			outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}" + options.ext
+			# ceck if the xliff exports differ from the xliff imports
+			
+			if options.infusemsgpath? and options.singleLangXLIFF?
+				_sourceLangs = path.resolve( options.infusemsgpath )
+				_xlfFiles = fs.readdirSync( _sourceLangs )
+				if "#{fname}_#{ options.singleLangXLIFF }.xlf" not in _xlfFiles
+					grunt.fail.warn("Required XLIFF file `#{fname}_#{ options.singleLangXLIFF }.xlf not found in path `#{_sourceLangs}`");
+					return
+				_langs = options.languages
+
+			else if options.infusemsgpath?
+				_sourceLangs = path.resolve( options.infusemsgpath )
+				_xlfFiles = fs.readdirSync( _sourceLangs )
+
+				_langs = []
+				for lng in options.languages
+					if "#{fname}_#{ lng }.xlf" in _xlfFiles
+						_langs.push( lng )
+					else
+						grunt.log.warn("XLIFF File `#{fname}_#{ lng }.xlf` not found so the language `#{lng}` will be skipped.")
+			else
+				_sourceLangs = _targetLangs
+				_langs = options.languages
+
+			grunt.log.debug(path.basename(f, '.soy') )
+
+			# calculate the path to the xliff files
+			
+			msgFileFormat = fname + "_{LOCALE}.xlf"
+
+			grunt.log.debug( msgFileFormat )
+			if Array.isArray( f )
+				grunt.log.writeln('Compile ' + f.join( "', '" ) + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + _langs.join( ", " ) + "." + _sourceLangs)
+			else
+				grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + _langs.join( ", " ) + "." + _sourceLangs)
+
+			if Array.isArray( f )
+				_files = []
+				_files.push path.resolve( _file ) for _file in f
+			else
+				_files = path.resolve( f )
+
+			# run the soy compile 
+			soyC.msg2js( _files, _sourceLangs + "/" + msgFileFormat, outputPathFormat, _langs.join( "," ), cba )
+			return
+
+	grunt.log.writeflags( file, "extractAndCompile" )  
+	if file.src.length is 1
+		f = file.src[0]
 
 		# filter if its a call during a regard file change
 		if not fileFilter?.length or f in fileFilter
-			do( f )->
+			fnCompile( f )
 
-				# create target folder  if not exists
-				grunt.file.mkdir( options.extractmsgpath )
-
-				# set xliff targets
-				_targetLangs = path.resolve( options.extractmsgpath ) 
-				
-				fnExtract = ( f, lang )->
-					# add a extract task
-					aFns.push ( cba )->
-
-						# create path to the xliff file per language
-						msgFile = path.basename(f, '.soy') + "_" + lang + ".xlf"
-
-						grunt.log.writeln('Extract messages from ' + f + ' to ' + msgFile + ".")
-						
-						# run the soy extract 
-						soyC.soy2msg( path.resolve( f ), _targetLangs + "/" + msgFile, lang, options.sourceLang, cba )
-						return
-					return
-				
-				if options.singleLangXLIFF?
-					fnExtract( f, options.singleLangXLIFF )
-				else
-					for lang in options.languages
-						fnExtract( f, lang )
-				
-
-
-				# add a compile task
-				aFns.push ( cba )->
-
-					# calculate the final template file path
-					_targetPath = path.resolve( file.dest ).split(path.sep)
-					_targetPath.pop()
-					_targetPath = _targetPath.join( path.sep )
-					fname = path.basename( f, ".soy" )
-					outputPathFormat = _targetPath + "/" + fname + "_{LOCALE}" + options.ext
-					# ceck if the xliff exports differ from the xliff imports
-					
-					if options.infusemsgpath? and options.singleLangXLIFF?
-						_sourceLangs = path.resolve( options.infusemsgpath )
-						_xlfFiles = fs.readdirSync( _sourceLangs )
-						if "#{fname}_#{ options.singleLangXLIFF }.xlf" not in _xlfFiles
-							grunt.fail.warn("Required XLIFF file `#{fname}_#{ options.singleLangXLIFF }.xlf not found in path `#{_sourceLangs}`");
-							return
-						_langs = options.languages
-
-					else if options.infusemsgpath?
-						_sourceLangs = path.resolve( options.infusemsgpath )
-						_xlfFiles = fs.readdirSync( _sourceLangs )
-
-						_langs = []
-						for lng in options.languages
-							if "#{fname}_#{ lng }.xlf" in _xlfFiles
-								_langs.push( lng )
-							else
-								grunt.log.warn("XLIFF File `#{fname}_#{ lng }.xlf` not found so the language `#{lng}` will be skipped.")
-					else
-						_sourceLangs = _targetLangs
-						_langs = options.languages
-
-					grunt.log.debug(path.basename(f, '.soy') )
-
-					# calculate the path to the xliff files
-					
-					msgFileFormat = path.basename(f, '.soy') + "_{LOCALE}.xlf"
-
-					grunt.log.debug( msgFileFormat )
-					grunt.log.writeln('Compile ' + f + ' to ' + outputPathFormat[process.cwd().length+1..] + ' using languages ' + _langs.join( ", " ) + "." + _sourceLangs)
-
-					# run the soy compile 
-					soyC.msg2js( path.resolve( f ), _sourceLangs + "/" + msgFileFormat, outputPathFormat, _langs.join( "," ), cba )
-					return
+	else if file.src.length > 1
+		fnCompile( file.src )
 	
 	aFns
 
@@ -230,13 +285,13 @@ module.exports = ( grunt )->
 		else
 			# get the changed files from the regarde task
 			changed = grunt.regarde?.changed or []
-		grunt.log.debug( "File filter: #{ JSON.stringify( changed ) }")
 
 		# set as async task
 		done = this.async()
 
 		grunt.log.debug( "File filter: #{ JSON.stringify( changed ) }")
 
+		#grunt.log.debug( JSON.stringify( this ) )  
 
 		# set default options
 		options = this.options
@@ -248,12 +303,20 @@ module.exports = ( grunt )->
 			singleLangXLIFF: null
 			languages: []
 			ext: ".js"
+			compileflags: {}
 
 		# set the jsr path out of `options.jarPath`
 		soyC.setJarPath( options.jarPath )
 		
 		if options.isUsingIjData
-			soyC.useIjData()
+			grunt.log.warn( "`isUsingIjData` is deprecated. Please use the `compileflags` option." )
+			soyC.addFlag( "isUsingIjData", true )
+
+		if options.compileflags?
+			for _k, _v of options.compileflags
+				grunt.verbose.writeln( "Add Compile flag #{_k}:#{_v}" )
+				soyC.addFlag( _k, _v )
+
 
 		grunt.verbose.writeflags(options, 'Options')
 

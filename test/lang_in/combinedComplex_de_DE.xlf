@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file original="SoyMsgBundle" datatype="x-soy-msg-bundle" xml:space="preserve" source-language="de_DE" target-language="de_DE">
+    <body>
+      <trans-unit id="2199951751095806145" datatype="html">
+        <source>Hello again test script!</source>
+        <target>Nochmal Hallo Test script</target>
+        <note priority="1" from="description">hello test</note>
+      </trans-unit>
+      <trans-unit id="7802788179936490167" datatype="html">
+        <source>Hello <x id="NAME"/>.</source>
+        <target>Hallo <x id="NAME"/>.</target>
+        <note priority="1" from="description">hello you</note>
+      </trans-unit>
+     <trans-unit id="3062066784856942124" datatype="html">
+        <source>Hello test script!</source>
+        <target>Hallo Test Script!</target>
+        <note priority="1" from="description">hello test</note>
+      </trans-unit>
+      <trans-unit id="5155162414904536543" datatype="html">
+        <source>Hello <x id="NAME"/>. How are you?</source>
+        <target>Hallo <x id="NAME"/>. Wie geht's?</target>
+        <note priority="1" from="description">hello you</note>
+      </trans-unit>
+       <trans-unit id="7805684753523743385" datatype="html">
+        <source>This is a subfolder!</source>
+        <target>Dies ist ein Unterordner!</target>
+        <note priority="1" from="description">hello test</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
