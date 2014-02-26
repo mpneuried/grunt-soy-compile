@@ -115,26 +115,25 @@ class Compiler
 
 # function aggregator for non localized soy files
 simpleCompile = ( aFns, file, options, grunt, fileFilter )->
-	if file.src.length is 1
-		f = file.src[0]
-		
-		# filter if its a call during a regard file change
-		if not fileFilter?.length or f in fileFilter
-			do( f )=>
-				# add a compile task
-				aFns.push ( cba )->
-					# calculate the final template file path
-					_targetPath = path.resolve( file.dest ).split(path.sep)
-					_targetPath.pop()
-					_targetPath = _targetPath.join( path.sep )
-					fname = path.basename( f, ".soy" )
-					_target = _targetPath + "/" + fname + options.ext
+	if file.orig.expand
+		for f in file.src
+			# filter if its a call during a regard file change
+			if not fileFilter?.length or f in fileFilter
+				do( f )=>
+					# add a compile task
+					aFns.push ( cba )->
+						# calculate the final template file path
+						_targetPath = path.resolve( file.dest ).split(path.sep)
+						_targetPath.pop()
+						_targetPath = _targetPath.join( path.sep )
+						fname = path.basename( f, ".soy" )
+						_target = _targetPath + "/" + fname + options.ext
 
-					grunt.log.writeln('Compile ' + f + ' to ' + _target[process.cwd().length+1..] + ".")
+						grunt.log.writeln('Compile ' + f + ' to ' + _target[process.cwd().length+1..] + ".")
 
-					# run the soy compile 
-					soyC.soy2js( path.resolve( f ), _target, cba )
-					return
+						# run the soy compile 
+						soyC.soy2js( path.resolve( f ), _target, cba )
+						return
 	else if file.src.length > 1
 		aFns.push ( cba )->
 			# calculate the final template file path
@@ -250,13 +249,11 @@ extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 			soyC.msg2js( _files, _sourceLangs + "/" + msgFileFormat, outputPathFormat, _langs.join( "," ), cba )
 			return
 
-	grunt.log.writeflags( file, "extractAndCompile" )  
-	if file.src.length is 1
-		f = file.src[0]
-
-		# filter if its a call during a regard file change
-		if not fileFilter?.length or f in fileFilter
-			fnCompile( f )
+	if file.orig.expand
+		for f in file.src
+			# filter if its a call during a regard file change
+			if not fileFilter?.length or f in fileFilter
+					fnCompile( f )
 
 	else if file.src.length > 1
 		fnCompile( file.src )

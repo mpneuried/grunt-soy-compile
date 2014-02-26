@@ -143,34 +143,37 @@
   })();
 
   simpleCompile = function(aFns, file, options, grunt, fileFilter) {
-    var f;
-    if (file.src.length === 1) {
-      f = file.src[0];
-      if (!(fileFilter != null ? fileFilter.length : void 0) || __indexOf.call(fileFilter, f) >= 0) {
-        (function(_this) {
-          return (function(f) {
-            return aFns.push(function(cba) {
-              var fname, _target, _targetPath;
-              _targetPath = path.resolve(file.dest).split(path.sep);
-              _targetPath.pop();
-              _targetPath = _targetPath.join(path.sep);
-              fname = path.basename(f, ".soy");
-              _target = _targetPath + "/" + fname + options.ext;
-              grunt.log.writeln('Compile ' + f + ' to ' + _target.slice(process.cwd().length + 1) + ".");
-              soyC.soy2js(path.resolve(f), _target, cba);
+    var f, _i, _len, _ref;
+    if (file.orig.expand) {
+      _ref = file.src;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        if (!(fileFilter != null ? fileFilter.length : void 0) || __indexOf.call(fileFilter, f) >= 0) {
+          (function(_this) {
+            return (function(f) {
+              return aFns.push(function(cba) {
+                var fname, _target, _targetPath;
+                _targetPath = path.resolve(file.dest).split(path.sep);
+                _targetPath.pop();
+                _targetPath = _targetPath.join(path.sep);
+                fname = path.basename(f, ".soy");
+                _target = _targetPath + "/" + fname + options.ext;
+                grunt.log.writeln('Compile ' + f + ' to ' + _target.slice(process.cwd().length + 1) + ".");
+                soyC.soy2js(path.resolve(f), _target, cba);
+              });
             });
-          });
-        })(this)(f);
+          })(this)(f);
+        }
       }
     } else if (file.src.length > 1) {
       aFns.push(function(cba) {
-        var _files, _i, _len, _ref, _target;
+        var _files, _j, _len1, _ref1, _target;
         _target = path.resolve(file.dest);
         grunt.log.writeln('Compile ' + file.src.join("', '") + ' to ' + _target.slice(process.cwd().length + 1) + ".");
         _files = [];
-        _ref = file.src;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          f = _ref[_i];
+        _ref1 = file.src;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          f = _ref1[_j];
           _files.push(path.resolve(f));
         }
         soyC.soy2js(_files, _target, cba);
@@ -180,7 +183,7 @@
   };
 
   extractAndCompile = function(aFns, file, options, grunt, fileFilter) {
-    var f, fnCompile;
+    var f, fnCompile, _i, _len, _ref;
     fnCompile = function(f) {
       var fnExtract, lang, _i, _len, _ref, _targetLangs;
       grunt.file.mkdir(options.extractmsgpath);
@@ -271,11 +274,13 @@
         soyC.msg2js(_files, _sourceLangs + "/" + msgFileFormat, outputPathFormat, _langs.join(","), cba);
       });
     };
-    grunt.log.writeflags(file, "extractAndCompile");
-    if (file.src.length === 1) {
-      f = file.src[0];
-      if (!(fileFilter != null ? fileFilter.length : void 0) || __indexOf.call(fileFilter, f) >= 0) {
-        fnCompile(f);
+    if (file.orig.expand) {
+      _ref = file.src;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        f = _ref[_i];
+        if (!(fileFilter != null ? fileFilter.length : void 0) || __indexOf.call(fileFilter, f) >= 0) {
+          fnCompile(f);
+        }
       }
     } else if (file.src.length > 1) {
       fnCompile(file.src);

@@ -254,6 +254,7 @@ See this grunt [issue](https://github.com/gruntjs/grunt/pull/750) for more infor
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.5.1|2013-11-22|Small bugfix for correct old `expand = true handling |
 |v0.5.0|2013-02-26|Added handling to compile soyfiles to one js file ( Issue #5 ); Added `compileflags` to ba able to configure the Soy compiler jar ( Issue #6) |
 |v0.4.1|2013-11-22|Updated dependencies to match Grunt 0.4.2 |
 |v0.4.0|2013-10-05|Added compile options `ext` to define the generated file extension |
