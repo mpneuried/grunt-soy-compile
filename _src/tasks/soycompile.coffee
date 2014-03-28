@@ -84,17 +84,14 @@ class Compiler
 			if val is true
 				_command += "--#{ key } "	
 			else
-				_command += "--#{ key } #{ val } "
+				_command += "--#{ key } \"#{ val }\" "
 
 		if Array.isArray( file )
-			if path.indexOf( "SoyToJsSrcCompiler" ) >= 0
-				_command += "--srcs #{ file.join(',') } "
-			else
-				_command += file.join(' ')
+			_command += "--srcs \"#{ file.join('","') }\" "
 		else
-			_command += file
+			_command += "--srcs \"#{ file }\""
 
-		@grunt.verbose.writeln( _command )
+		@grunt.verbose.writeln( "EXEC:\n" + _command )
 
 		exec _command, ( err, stdout, stderr )=>
 			if err

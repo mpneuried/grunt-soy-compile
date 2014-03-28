@@ -46,6 +46,15 @@ module.exports = (grunt) ->
 					jarPath: "~/local/soy"
 					ext: ".soy.js"
 
+			testspace:
+				expand: true
+				cwd: 'test/tmpls',
+				src: ["*.soy"]
+				dest: "tmp/test with/spaces"
+				options:
+					jarPath: "~/local/soy"
+					ext: ".soy.js"
+
 			testLang:
 				expand: true
 				cwd: 'test/tmpls',
@@ -137,8 +146,8 @@ module.exports = (grunt) ->
 					msgextract: true
 					sourceLang: "de_DE"
 					languages: [ "de_DE", "en_GB", "jp_JP", "cz_CN" ]
-					extractmsgpath: "tmp/lang_out"
-					infusemsgpath: "test/lang_in"
+					extractmsgpath: "tmp/lang output with spaces"
+					infusemsgpath: "test/lang input with spaces"
 
 			usingCompileFlags:
 				src: ['test/tmpls/test.soy', 'test/tmpls/test.nr2.soy']

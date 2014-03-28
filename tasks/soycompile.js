@@ -106,19 +106,15 @@
         if (val === true) {
           _command += "--" + key + " ";
         } else {
-          _command += "--" + key + " " + val + " ";
+          _command += "--" + key + " \"" + val + "\" ";
         }
       }
       if (Array.isArray(file)) {
-        if (path.indexOf("SoyToJsSrcCompiler") >= 0) {
-          _command += "--srcs " + (file.join(',')) + " ";
-        } else {
-          _command += file.join(' ');
-        }
+        _command += "--srcs \"" + (file.join('","')) + "\" ";
       } else {
-        _command += file;
+        _command += "--srcs \"" + file + "\"";
       }
-      this.grunt.verbose.writeln(_command);
+      this.grunt.verbose.writeln("EXEC:\n" + _command);
       exec(_command, (function(_this) {
         return function(err, stdout, stderr) {
           if (err) {

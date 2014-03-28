@@ -204,6 +204,10 @@ For more examples on how to use the `expand` API shown in the `glob_to_multiple`
 - if you use `grunt-regards` instead of `grunt-contrib-watch` to track chnaging files, the compiler will only compile the changed file.
 - if you want to compile only the changed file by `grunt-contrib-watch` you have to define the watch option`options: { spawn: false }`, beause with a spawned task i can not catch the `changed` event through multiple threads.
 
+#### Path restrictions
+
+- It's not possibel to use a `,` within the paths to the grunt, xliff, soy or js files, because it's the java command file delimiter.
+
 #### differnet `jarPaths`
 
 If you have to define different paths to the jarFiles for differnet developers i use the folowing solution.
@@ -254,6 +258,7 @@ See this grunt [issue](https://github.com/gruntjs/grunt/pull/750) for more infor
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.5.2|2014-03-28|Bugfix for correct handling of soy, msg and xliff folders with spaces. But it's not possible to use a `,`, because it's the java command file delimiter! |
 |v0.5.1|2013-11-22|Small bugfix for correct old `expand = true handling |
 |v0.5.0|2013-02-26|Added handling to compile soyfiles to one js file ( Issue #5 ); Added `compileflags` to ba able to configure the Soy compiler jar ( Issue #6) |
 |v0.4.1|2013-11-22|Updated dependencies to match Grunt 0.4.2 |
