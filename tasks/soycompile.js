@@ -144,7 +144,7 @@
       _ref = file.src;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         f = _ref[_i];
-        if (!(fileFilter != null ? fileFilter.length : void 0) || __indexOf.call(fileFilter, f) >= 0) {
+        if (!(fileFilter != null ? fileFilter.length : void 0) || f.indexOf(fileFilter) >= 0) {
           (function(_this) {
             return (function(f) {
               return aFns.push(function(cba) {

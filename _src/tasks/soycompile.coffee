@@ -115,7 +115,7 @@ simpleCompile = ( aFns, file, options, grunt, fileFilter )->
 	if file.orig.expand
 		for f in file.src
 			# filter if its a call during a regard file change
-			if not fileFilter?.length or f in fileFilter
+			if not fileFilter?.length or f.indexOf(fileFilter) >= 0
 				do( f )=>
 					# add a compile task
 					aFns.push ( cba )->
