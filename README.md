@@ -174,23 +174,68 @@ soycompile: {
 A complex example using the extractor and soy translation features.
 
 ```js
-soycompile: {
-	mytask: {
-		expand: true, 
-		cwd: 'relative/path/to/sources',
-		src: ["*.soy"],
-		dest: "relative/path/for/results",
-		options: {
-			jarPath: "/absolute/path/to/the/jar/files",
-			msgextract: true,
-			sourceLang: "en_GB",
-			languages: [ "en_GB", "de_DE", "jp_JP" ],
-			singleLangXLIFF: "de_DE"
-			extractmsgpath: "relative/path/for/generated/xliffs",
-			infusemsgpath: "relative/path/to/translated/xliffs"
+	soycompile: {
+		mytask: {
+			expand: true, 
+			cwd: 'relative/path/to/sources',
+			src: ["*.soy"],
+			dest: "relative/path/for/results",
+			options: {
+				jarPath: "/absolute/path/to/the/jar/files",
+				msgextract: true,
+				sourceLang: "en_GB",
+				languages: [ "en_GB", "de_DE", "jp_JP" ],
+				singleLangXLIFF: "de_DE"
+				extractmsgpath: "relative/path/for/generated/xliffs",
+				infusemsgpath: "relative/path/to/translated/xliffs"
+			}
 		}
 	}
-}
+```
+
+#### with `grunt-contrib-watch`
+
+Instead of using `grunt-regard` you can also use `grunt-contrib-watch` to watch and only compile the changed soy file.
+
+```js
+grunt.initConfig(
+	watch: {
+		options: {
+			spawn: false
+		}
+		templates: {
+			files: ["relative/path/to/sources/*.soy"]
+			tasks: [ "soycompile:templates" ]
+		}
+	},
+	soycompile: {
+		mytask: {
+			src: ['test/tmpls/**/*.soy'],
+			dest: 'relative/path/for/results/myTemplates.js',
+			options: {
+				jarPath: "/absolute/path/to/the/jar/files"
+			}
+		}
+	}
+);
+
+grunt.event.on('watch', function(action, filepath, subtask) {
+	var _tasks, _t, i, len, ref, task;
+	// get the configured tasks to run and reconfig
+	_tasks = grunt.config( "watch." + subtask + ".tasks" );
+	if( !grunt.util._.isArray( _tasks ) ){
+		_tasks = [ _tasks ];
+	}
+	for (i = 0, len = _tasks.length; i < len; i++) {
+		task = _tasks[i];
+		// change task format from `:` to `.`
+		_t = task.split(":").join(".");
+		// chnage the grunt config for each task if a `src` config exists
+		if ((ref = grunt.config(_t + ".src")) != null ? ref.length : void 0) {
+			grunt.config(_t + ".src", filepath);
+		}
+	}
+});
 ```
 
 **NOTE:** If you use the "to one file" Syntax ( using without `expand: true` ) the generated xliff files will also be generated info and are required to infuse by a single file per language ( e.g. `relative/path/for/generated/xliffs/myTemplates_de_de.xlf`, `relative/path/for/generated/xliffs/myTemplates_gb_en.xlf`, ... ).
@@ -245,6 +290,9 @@ grunt.initConfig({
 });
 ```
 
+
+
+
 ## Attention
 
 You have to be carefull with filenames containing multiple dots!
@@ -259,6 +307,7 @@ See this grunt [issue](https://github.com/gruntjs/grunt/pull/750) for more infor
 |Version|Date|Description|
 |:--:|:--:|:--|
 |v0.5.2|2014-03-28|Bugfix for correct handling of soy, msg and xliff folders with spaces. But it's not possible to use a `,`, because it's the java command file delimiter! |
+|v0.6.0|2016-02-17|Made some changes to use it with 'grunt-contrib-watch`|
 |v0.5.1|2013-11-22|Small bugfix for correct old `expand = true handling |
 |v0.5.0|2013-02-26|Added handling to compile soyfiles to one js file ( Issue #5 ); Added `compileflags` to ba able to configure the Soy compiler jar ( Issue #6) |
 |v0.4.1|2013-11-22|Updated dependencies to match Grunt 0.4.2 |

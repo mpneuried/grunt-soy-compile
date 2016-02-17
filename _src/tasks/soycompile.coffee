@@ -14,6 +14,7 @@ class Compiler
 
 	# set the path to the jar files
 	setJarPath: ( path )=>
+		@grunt.verbose.writeln( "setJarPath" )
 		if path?.length
 			@soyCom =  path + "/SoyToJsSrcCompiler.jar"
 			@msgExt =  path + "/SoyMsgExtractor.jar"
@@ -24,12 +25,14 @@ class Compiler
 		return
 
 	addFlag: ( key, value )->
+		@grunt.verbose.writeln( "addFlag" )
 		@compileflags[ key ] = value
 		return
 
 
 	# compile a js template out of a soy file
 	soy2js: ( file, output, cb )=>
+		@grunt.verbose.writeln( "soy2js" )
 		if not @soyCom
 			@_jarPathError()
 			return
@@ -47,6 +50,7 @@ class Compiler
 
 	# extract xliff files out of the soy messgages
 	soy2msg: ( file, output, lang, sourcelang, cb )=>
+		@grunt.verbose.writeln( "soy2msg" )
 		if not @msgExt
 			@_jarPathError()
 			return
@@ -61,6 +65,7 @@ class Compiler
 
 	# compile the soy file including localisation by the xliff files
 	msg2js: ( file, fileFormat, output, langs, cb )=>
+		@grunt.verbose.writeln( "msg2js" )
 		if not @soyCom
 			@_jarPathError()
 			return
@@ -79,6 +84,7 @@ class Compiler
 
 	# call java jar and return the results
 	_compile: ( path, file, args, cb )=>
+		@grunt.verbose.writeln( "_compile" )
 		_command = "java -jar #{ path } "
 		for key, val of args
 			if val is true
@@ -104,6 +110,7 @@ class Compiler
 
 	# throw an error if the jar path has not been set
 	_jarPathError: =>
+		@grunt.verbose.writeln( "_jarPathError" )
 		_err = new Error()
 		_err.name = "missing-jar-path"
 		_err.message = "Before using grunt-soy-compile you have to define the jar paths by settng the option `jarPath`"
@@ -112,7 +119,7 @@ class Compiler
 
 # function aggregator for non localized soy files
 simpleCompile = ( aFns, file, options, grunt, fileFilter )->
-	if file.orig.expand
+	if Array.isArray( file.src ) and file.expand or file.orig?.expand
 		for f in file.src
 			# filter if its a call during a regard file change
 			if not fileFilter?.length or f.indexOf(fileFilter) >= 0
@@ -246,7 +253,7 @@ extractAndCompile = ( aFns, file, options, grunt, fileFilter )->
 			soyC.msg2js( _files, _sourceLangs + "/" + msgFileFormat, outputPathFormat, _langs.join( "," ), cba )
 			return
 
-	if file.orig.expand
+	if Array.isArray( file.src ) and file.expand or file.orig?.expand
 		for f in file.src
 			# filter if its a call during a regard file change
 			if not fileFilter?.length or f in fileFilter
@@ -317,7 +324,7 @@ module.exports = ( grunt )->
 		# collect the async function
 		aFns = []
 
-		this.files.forEach ( file )->
+		addFile = ( file )->
 			if not options.msgextract
 				simpleCompile( aFns, file, options, grunt, changed )
 			else if options.msgextract and options.extractmsgpath?
@@ -325,6 +332,12 @@ module.exports = ( grunt )->
 			else
 				simpleCompile( aFns, file, options, grunt, changed )
 			return		
+
+		if this.files?.length
+			this.files.forEach( addFile )
+		else
+			addFile( @data )
+			
 
 		# run all collected compile tasks
 		async.series aFns, ( err, result )=>
